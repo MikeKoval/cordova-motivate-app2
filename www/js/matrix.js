@@ -33,6 +33,18 @@ function Board(cols, rows) {
     }
 }
 
+Board.prototype.rebuild = function(letters, shit) {
+    var i, j;
+
+    for (i = 0; i < board.rowsNum; i++) {
+        for (j = 0; j < board.colsNum; j++) {
+            board.rows[i].letters[j].set(letters[Math.floor(Math.random() * lettersLen)].toUpperCase());
+        }
+    }
+    console.log(shit);
+}
+
+
 function Row(length) {
     this.length = length || 25,
     this.letters = [];
@@ -55,23 +67,5 @@ Letter.prototype.draw = function() {
     // draw
 }
 
-
-function rebuild(cols, rows, letters, shit) {
-    var board = new Board();
-
-
-    for (i = 0; i < cols; i++) {
-        for (j = 0; j < rows; j++) {
-            if (!matrix[i]) matrix[i] = [];
-            matrix[i][j] = letters[Math.floor(Math.random() * lettersLen)].toUpperCase();
-        }
-    }
-
-
-    console.log(shit);
-    console.log('matrix', matrix);
-
-}
-
-//rebuild(cols, rows, letters, initialShit);
+Board.rebuild(letters, initialShit);
 
