@@ -44,14 +44,7 @@ class Board {
     static set context(value) {
         Board._context = value;
     }
-
-    static get shitHeap() {
-        return shitHeap._context;
-    }
-    static set shitHeap(value) {
-        shitHeap._context = value;
-    }
-
+    
     static get fontSize() {
         return Board._fontSize;
     }
@@ -74,20 +67,19 @@ class Board {
         Board._cellHeight = value;
     }
 
-    get phraseIndex() {
-        return this._phraseIndex;
+    get phrase() {
+        return this._phrase;
     }
-    set phraseIndex(value) {
-        this._phraseIndex = value;
+    set phrase(value) {
+        this._phrase = value;
     }
 
-    constructor(context, shitHeap, initialShitIndex, cols, rows, fontSize, cellWidth, cellHeight, letters) {
+    constructor(context, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters) {
         Board.context = context;
-        Board.shitHeap = shitHeap;
 
         this.colsNum = cols || 15;
         this.rowsNum = rows || 25;
-        this.initialShitIndex = initialShitIndex || 0;
+        this.initialShit = initialShit || 'HELLO';
         Board.fontSize = fontSize || 20;
         Board.cellWidth = cellWidth || Board.fontSize*2;
         Board.cellHeight = cellHeight || Board.fontSize*2;
@@ -101,7 +93,7 @@ class Board {
 
         this.erase();
 
-        this.setPhrase(this.initialShitIndex);
+        this.setPhrase(this.initialShit);
 
         this.initEvents();
     }
@@ -151,15 +143,13 @@ class Board {
         return this;
     }
 
-    setPhrase(phraseIndex) {
-        this.phraseIndex = phraseIndex;
+    setPhrase(phrase) {
+        this.phrase = phrase;
 
         this
             .rebuild()
             .disable()
             .draw();
-
-        let phrase = Board.shitHeap[this.phraseIndex];
 
 
         phrase = phrase.replace(/,\s/gi, ",");
@@ -448,7 +438,7 @@ class Letter{
     }
 }
 
-let board = new Board(ctx, shitHeap, 0, cols, rows, fontSiz, cellWidth, cellHeight, letters);
+let board = new Board(ctx, 'String', cols, rows, fontSiz, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
