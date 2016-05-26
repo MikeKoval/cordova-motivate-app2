@@ -239,7 +239,7 @@ class Board {
             console.log('velocity', velocity);
             console.log('direction', direction);
 
-            self.setPhrase(random(0, shitHeap.length - 1));
+            self.setPhrase(shitHeap[random(0, shitHeap.length - 1)]);
             self.loop(velocity, direction);
         });
     }
@@ -438,7 +438,7 @@ class Letter{
     }
 }
 
-let board = new Board(ctx, 'String', cols, rows, fontSiz, cellWidth, cellHeight, letters);
+let board = new Board(ctx, initialShit, cols, rows, fontSiz, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
