@@ -45,6 +45,13 @@ class Board {
         Board._context = value;
     }
 
+    static get shitHeap() {
+        return shitHeap._context;
+    }
+    static set shitHeap(value) {
+        shitHeap._context = value;
+    }
+
     static get fontSize() {
         return Board._fontSize;
     }
@@ -67,12 +74,20 @@ class Board {
         Board._cellHeight = value;
     }
 
-    constructor(context, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters) {
-        Board.context = context;
+    get phraseIndex() {
+        return this._phraseIndex;
+    }
+    set phraseIndex(value) {
+        this._phraseIndex = value;
+    }
 
-        this.initialShit = initialShit || 'ELIFTECH';
+    constructor(context, shitHeap, initialShitIndex, cols, rows, fontSize, cellWidth, cellHeight, letters) {
+        Board.context = context;
+        Board.shitHeap = shitHeap;
+
         this.colsNum = cols || 15;
         this.rowsNum = rows || 25;
+        this.initialShitIndex = initialShitIndex || 0;
         Board.fontSize = fontSize || 20;
         Board.cellWidth = cellWidth || Board.fontSize*2;
         Board.cellHeight = cellHeight || Board.fontSize*2;
@@ -86,7 +101,7 @@ class Board {
 
         this.erase();
 
-        this.setPhrase(this.initialShit);
+        this.setPhrase(this.initialShitIndex);
 
         this.initEvents();
     }
@@ -136,11 +151,15 @@ class Board {
         return this;
     }
 
-    setPhrase(phrase) {
+    setPhrase(phraseIndex) {
+        this.phraseIndex = phraseIndex;
+
         this
             .rebuild()
             .disable()
             .draw();
+
+        let phrase = Board.shitHeap[this.phraseIndex];
 
 
         phrase = phrase.replace(/,\s/gi, ",");
@@ -230,8 +249,16 @@ class Board {
             console.log('velocity', velocity);
             console.log('direction', direction);
 
-            self.setPhrase(shitHeap[random(0, shitHeap.length - 1)]);
+            let newPhraseIndex = self._phraseIndex;
 
+            console.info(self.phraseIndex, 'self._phraseIndex');
+            console.info(newPhraseIndex, 'newPhraseIndex');
+
+            while(self.phraseIndex == newPhraseIndex){
+                newPhraseIndex = random(0, shitHeap.length - 1);
+            }
+
+            self.setPhrase(newPhraseIndex);
         });
     }
 }
@@ -287,6 +314,18 @@ class Column {
         }
 
         return this;
+    }
+
+    shiftColumn(count){
+        this.letters = this.letters.slice(count).concat(this.letters.slice(0,count));
+
+        for(let index = 0; index < this.length; index += 1){
+            this.letters[index].index = index;
+        }
+
+        this
+            .erase()
+            .disable();
     }
 }
 
@@ -383,7 +422,7 @@ class Letter{
     }
 }
 
-let board = new Board(ctx, initialShit, cols, rows, fontSiz, cellWidth, cellHeight, letters);
+let board = new Board(ctx, shitHeap, 0, cols, rows, fontSiz, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
