@@ -1,8 +1,22 @@
+function getWindowSizes(){
+    let w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+    return {width: x, height: y};
+}
+
 let cols = 25,
     rows = 30,
-    fontSiz = 20,
-    cellWidth = window.innerWidth/rows,
-    cellHeight = window.innerHeight/cols,
+    width = getWindowSizes().width,
+    height = getWindowSizes().height,
+
+    cellWidth = width/cols,
+    cellHeight = height/rows,
+    fontSiz = cellWidth < cellHeight ? cellWidth/2 : cellHeight/2,
     canvas = document.getElementById("example"),
     ctx = canvas.getContext('2d'),
     letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя',
@@ -16,8 +30,8 @@ let cols = 25,
     ],
     initialShit = shitHeap[random(0, shitHeap.length - 1)];
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = width;
+canvas.height = height;
 
 function random(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -81,6 +95,7 @@ class Board {
         for (let i = 0; i < this.colsNum; i += 1) {
             for (let j = 0; j < this.rowsNum; j += 1) {
                 this.cols[i].letters[j].set(Board.letters[random(0, Board.letters.length - 1)].toUpperCase());
+                this.cols[i].letters[j].setPunctuation('');
             }
         }
 
@@ -164,7 +179,7 @@ class Board {
 
         let paragraph = rows;
 
-        let startY = Math.ceil(this.rowsNum/2) - Math.ceil(paragraph.length/2);
+        let startY = Math.ceil((this.rowsNum - paragraph.length)/2);
 
         for (let y = startY, i = 0; y < startY + paragraph.length; y += 1, i += 1) {
             let startX = Math.ceil(this.colsNum/2) - Math.ceil(paragraph[i].length/2);
@@ -301,7 +316,7 @@ class Letter{
         this.col = parent;
         this.index = index;
         this.name = letter || '';
-        this.punctuation = punctuation || false;
+        this.punctuation = punctuation || '';
 
         Letter.font = Board.fontSize + "px monospace";
         Letter.enabledFillStyle = '#000';
