@@ -1,23 +1,23 @@
 let cols = 25,
     rows = 30,
-    fontSize = 20,
-    cellSize = fontSize*2,
+    fontSiz = 20,
+    cellWidth = window.innerWidth/rows,
+    cellHeight = window.innerHeight/cols,
     canvas = document.getElementById("example"),
     ctx = canvas.getContext('2d'),
     letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя',
-    lettersLen = letters.length;
-
-    canvas.width = cols * cellSize;
-    canvas.height = rows * cellSize;
-
-let shitHeap = [
-    'Неважно, кто мы такие, важно то, какой у нас план.',
-    'Я сам творю свою удачу!',
-    'Не проблемы должны толкать вас в спину, а вперед вести мечты.',
-    'Пессимист видит трудность в любой возможности; оптимист – видит возможность в любой трудности.',
-    'Мы — рабы своих привычек. Измени свои привычки, и изменится твоя жизнь…',
+    shitHeap = [
+    'Неважно, кто мы такие, важно то, какой у нас план',
+    'Я сам творю свою удачу',
+    'Не проблемы должны толкать вас в спину, а вперед вести мечты',
+    'Пессимист видит трудность в любой возможности; оптимист – видит возможность в любой трудности',
+    'Мы — рабы своих привычек. Измени свои привычки, и изменится твоя жизнь',
     'Нельзя казнить помиловать'
-], shitLength = shitHeap.length, initialShit = shitHeap[Math.floor(Math.random() * shitLength)];
+    ],
+    initialShit = shitHeap[random(0, shitHeap.length - 1)];
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 function random(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -25,28 +25,61 @@ function random(min, max){
 
 
 class Board {
-    constructor(context, letters, initialShit, cols, rows) {
+    static get context() {
+        return Board._context;
+    }
+    static set context(value) {
+        Board._context = value;
+    }
+
+    static get fontSize() {
+        return Board._fontSize;
+    }
+
+    static set fontSize(value) {
+        Board._fontSize = value;
+    }
+
+    static get cellWidth() {
+        return Board._cellWidth;
+    }
+    static set cellWidth(value) {
+        Board._cellWidth = value;
+    }
+
+    static get cellHeight() {
+        return Board._cellHeight;
+    }
+    static set cellHeight(value) {
+        Board._cellHeight = value;
+    }
+
+    constructor(context, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters) {
+        Board.context = context;
+
+        this.initialShit = initialShit || 'ELIFTECH';
         this.colsNum = cols || 15;
         this.rowsNum = rows || 25;
+        Board.fontSize = fontSize || 20;
+        Board.cellWidth = cellWidth || Board.fontSize*2;
+        Board.cellHeight = cellHeight || Board.fontSize*2;
+        Board.letters = letters || 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
+
         this.cols = [];
-        this.context = context;
-        this.letters = letters;
-        this.initialShit = initialShit;
-        this.enabled = false;
 
         for(let index = 0; index < this.colsNum; index += 1){
-            this.cols[index] = new Column(this.context, this.rowsNum, index);
+            this.cols[index] = new Column(index, this.rowsNum);
         }
 
         this.erase();
 
-        this.setPhrase(shitHeap[random(0, shitLength-1)]);
+        this.setPhrase(this.initialShit);
     }
 
     rebuild() {
         for (let i = 0; i < this.colsNum; i += 1) {
             for (let j = 0; j < this.rowsNum; j += 1) {
-                this.cols[i].letters[j].set(this.letters[Math.floor(Math.random() * lettersLen)].toUpperCase());
+                this.cols[i].letters[j].set(Board.letters[random(0, Board.letters.length - 1)].toUpperCase());
             }
         }
 
@@ -62,8 +95,9 @@ class Board {
     }
 
     erase() {
-        this.context.fillStyle = 'rgb(238,232,170)';
-        this.context.fillRect(0, 0, example.width, example.height);
+        for(let index = 0; index < this.colsNum; index += 1) {
+            this.cols[index].erase();
+        }
 
         return this;
     }
@@ -93,7 +127,8 @@ class Board {
             .draw();
 
 
-        // let parts = phrase.split(' ');
+        phrase = phrase.replace(/,\s/gi, ",");
+        phrase = phrase.replace(/\.\s/gi, ".");
 
         /*
         Replace this part
@@ -111,7 +146,7 @@ class Board {
             }
             else{
                 rows[j] = rows[j].trim();
-                j++;
+                j += 1;
 
                 rows[j] = parts[i] + ' ';
             }
@@ -130,15 +165,27 @@ class Board {
 
         let startY = Math.ceil(this.rowsNum/2) - Math.ceil(paragraph.length/2);
 
-        // console.info(startY, 'startY');
-        // console.info(startY + paragraph.length, 'endY');
-
         for (let y = startY, i = 0; y < startY + paragraph.length; y += 1, i += 1) {
             let startX = Math.ceil(this.colsNum/2) - Math.ceil(paragraph[i].length/2);
 
-            // console.info(startX, 'startX');
-            // console.info(startX + paragraph[i].length, 'endX');
             for(let x = startX, j = 0; x < startX + paragraph[i].length; x += 1, j += 1){
+                if(paragraph[i][j] === ',' || paragraph[i][j] === '.'){
+                    this.cols[x].letters[y]
+                        .set('')
+                        .erase()
+                        .draw();
+
+                    continue;
+                }
+
+                if(paragraph[i][j+1] === ','){
+                    this.cols[x].letters[y].setPunctuation(',');
+                }
+
+                if(paragraph[i][j+1] === '.'){
+                    this.cols[x].letters[y].setPunctuation('.');
+                }
+
                 this.cols[x].letters[y]
                     .set(paragraph[i][j])
                     .erase()
@@ -146,24 +193,21 @@ class Board {
                     .draw();
             }
         }
-
-        // return rows;
     }
 }
 
 class Column {
-    constructor(context, length, index){
+    constructor(index, length){
+        this.index = index;
         this.length = length || 25;
         this.letters = [];
-        this.index = index;
-        this.context = context;
 
-        for(let index = 0;index < this.length; index += 1) {
+        for(let index = 0; index < this.length; index += 1) {
             this.letters[index] = new Letter(
-                this.context,
-                this, letters[Math.floor(Math.random() * lettersLen)].toUpperCase(),
+                this,
                 index,
-                this.enabled
+                Board.letters[random(0, Board.letters.length - 1)].toUpperCase(),
+                false
             );
         }
     }
@@ -177,8 +221,8 @@ class Column {
     }
 
     erase() {
-        this.context.fillStyle = 'rgb(238,232,170)';
-        this.context.fillRect(cellSize*this.index, 0, cellSize, cellSize*this.length);
+        Board.context.fillStyle = 'rgb(238,232,170)';
+        Board.context.fillRect(Board.cellWidth*this.index, 0, Board.cellWidth, Board.cellHeight*this.length);
 
         return this;
     }
@@ -195,8 +239,6 @@ class Column {
     }
 
     disable() {
-        this.enabled = true;
-
         for(let index = 0; index < this.length; index += 1) {
             this.letters[index]
                 .erase()
@@ -209,14 +251,42 @@ class Column {
 }
 
 class Letter{
-    constructor(context, parent, letter, index, enabled){
-        this.name = letter || '';
+    static get font(){
+        return Letter._font;
+    }
+    static set font(value){
+        Letter._font = value;
+    }
+
+    static get enabledFillStyle(){
+        return Letter._enabledFillStyle;
+    }
+    static set enabledFillStyle(value){
+        Letter._enabledFillStyle = value;
+    }
+
+    static get disabledFillStyle(){
+        return Letter._disabledFillStyle;
+    }
+    static set disabledFillStyle(value){
+        Letter._disabledFillStyle = value;
+    }
+
+    constructor(parent, index, letter, punctuation){
         this.col = parent;
         this.index = index;
-        this.enabled = enabled || false;
-        this.hasComma = false;
+        this.name = letter || '';
+        this.punctuation = punctuation || false;
 
-        this.context = context;
+        Letter.font = Board.fontSize + "px monospace";
+        Letter.enabledFillStyle = '#000';
+        Letter.disabledFillStyle = 'rgba(0,0,0,0.2)';
+
+        this.disable();
+    }
+
+    drawSymbol(){
+
     }
 
     set(value) {
@@ -225,41 +295,56 @@ class Letter{
         return this;
     }
 
+    setPunctuation(value){
+        this.punctuation = value;
+
+        return this;
+    }
+
     enable(){
-        this.enabled = true;
+        this.drawSymbol = this._drawEnabledSymbol;
 
         return this;
     }
 
     disable() {
-        this.enabled = false;
+        this.drawSymbol = this._drawDisabledSymbol;
 
         return this;
     }
 
     draw() {
-        this.context.font = fontSize + "px monospace";
-        this.context.fillStyle = 'rgba(0,0,0,0.2)';
+        this.drawSymbol();
 
-        if(this.enabled){
-            this.context.fillStyle = '#000';
+        if(this.punctuation){
+            Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth/2, this.index*Board.cellHeight + Board.fontSize);
         }
-
-        this.context.fillText(this.name, this.col.index * cellSize, this.index*cellSize + fontSize);
 
         return this;
     }
 
+    _drawEnabledSymbol() {
+        Board.context.font = Letter.font;
+        Board.context.fillStyle = Letter.enabledFillStyle;
+        Board.context.fillText(this.name, this.col.index * Board.cellWidth, this.index*Board.cellHeight + Board.fontSize);
+    }
+
+    _drawDisabledSymbol() {
+        Board.context.font = Letter.font;
+        Board.context.fillStyle = Letter.disabledFillStyle;
+        Board.context.fillText(this.name, this.col.index * Board.cellWidth, this.index*Board.cellHeight + Board.fontSize);
+    }
+
     erase() {
-        this.context.fillStyle = 'rgb(238,232,170)';
-        this.context.fillRect(cellSize*this.col.index, cellSize*this.index, cellSize, cellSize);
+        Board.context.fillStyle = 'rgb(238,232,170)';
+        Board.context.fillRect(Board.cellWidth*this.col.index, Board.cellHeight*this.index, Board.cellWidth, Board.cellHeight);
 
         return this;
     }
 }
 
-    let board = new Board(ctx, letters, initialShit, cols, rows);
+let board = new Board(ctx, initialShit, cols, rows, fontSiz, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
-board.draw();
+// board.draw();
