@@ -316,7 +316,7 @@ class Column {
         return this;
     }
 
-    shiftColumn(count){
+    shift(count){
         this.letters = this.letters.slice(count).concat(this.letters.slice(0,count));
 
         for(let index = 0; index < this.length; index += 1){
@@ -325,7 +325,9 @@ class Column {
 
         this
             .erase()
-            .disable();
+            .draw();
+
+        return this;
     }
 }
 
