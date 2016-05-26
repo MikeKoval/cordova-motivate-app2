@@ -259,6 +259,12 @@ class Board {
             }
 
             self.setPhrase(newPhraseIndex);
+
+            let step = ev.velocity < 0 ? 1 : -1;
+
+            for(let i = 0; i < board.colsNum; i += 1){
+                setInterval(function(){board.cols[i].shift(step);}, random(10,20));
+            }
         });
     }
 }
