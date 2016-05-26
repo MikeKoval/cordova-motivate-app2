@@ -244,28 +244,46 @@ class Board {
         });
 
         mc.on("swipe", function(ev) {
-            var direction = ev.velocity < 0 ? 'down' : 'up',
+            var direction = ev.velocity < 0 ? 1 : -1,
                 velocity = Math.abs(ev.velocity);
             console.log('velocity', velocity);
             console.log('direction', direction);
 
-            let newPhraseIndex = self._phraseIndex;
-
-            console.info(self.phraseIndex, 'self._phraseIndex');
-            console.info(newPhraseIndex, 'newPhraseIndex');
-
-            while(self.phraseIndex == newPhraseIndex){
-                newPhraseIndex = random(0, shitHeap.length - 1);
-            }
-
-            self.setPhrase(newPhraseIndex);
-
-            let step = ev.velocity < 0 ? 1 : -1;
-
-            for(let i = 0; i < board.colsNum; i += 1){
-                setInterval(function(){board.cols[i].shift(step);}, random(10,20));
-            }
+            self.setPhrase(random(0, shitHeap.length - 1));
+            self.loop(velocity, direction);
         });
+    }
+
+    loop(velocity, direction) {
+        //Board.context.transform(1, 0, 0, 1, canvas.width, canvas.height/2);
+        //
+        if(this.looper) clearInterval(this.looper);
+        
+        var image = new Image(),
+            CanvasYSize = canvas.height,
+            y = 0;
+        image.src = canvas.toDataURL("image/png");
+        var translate = Math.floor(velocity*direction);
+        this.looper = setInterval(() => {
+            Board.context.clearRect(0,0,canvas.width,canvas.height);
+
+            //translate += Math.ceil(velocity*direction);
+            console.log('transform', translate);
+
+            if (y > (CanvasYSize)) { y = 0; }
+            //draw aditional image
+
+            if (y > (CanvasYSize-image.height)) {
+                console.log('draw more');
+                ctx.drawImage(image,0,y-canvas.height+1,image.width,image.height);
+            }
+
+            ctx.drawImage(image,0,y, canvas.width, canvas.height);
+
+            y += translate;
+        }, 50);
+
+        // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
     }
 }
 
