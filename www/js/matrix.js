@@ -23,7 +23,6 @@ function random(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-
 class Board {
     static get context() {
         return Board._context;
@@ -74,6 +73,8 @@ class Board {
         this.erase();
 
         this.setPhrase(this.initialShit);
+
+        this.initEvents();
     }
 
     rebuild() {
@@ -193,6 +194,30 @@ class Board {
                     .draw();
             }
         }
+    }
+
+    initEvents() {
+        var boardElm = document.getElementById('example'),
+        hammertime = new Hammer(boardElm, {});
+        hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL }),
+        self = this;
+
+        var mc = new Hammer.Manager(boardElm, {
+            recognizers: [
+                // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
+                [Hammer.Swipe,{ direction: Hammer.DIRECTION_VERTICAL }],
+            ]
+        });
+
+        mc.on("swipe", function(ev) {
+            var direction = ev.velocity < 0 ? 'down' : 'up',
+                velocity = Math.abs(ev.velocity);
+            console.log('velocity', velocity);
+            console.log('direction', direction);
+
+            self.setPhrase(shitHeap[random(0, shitHeap.length - 1)]);
+
+        });
     }
 }
 
