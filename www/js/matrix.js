@@ -1,38 +1,3 @@
-function getWindowSizes(){
-    let w = window,
-        d = document,
-        e = d.documentElement,
-        g = d.getElementsByTagName('body')[0],
-        x = w.innerWidth || e.clientWidth || g.clientWidth,
-        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
-
-    return {width: x, height: y};
-}
-
-let cols = 25,
-    rows = 30,
-    width = getWindowSizes().width,
-    height = getWindowSizes().height,
-
-    cellWidth = width/cols,
-    cellHeight = height/rows,
-    fontSiz = cellWidth < cellHeight ? cellWidth/2 : cellHeight/2,
-    canvas = document.getElementById("example"),
-    ctx = canvas.getContext('2d'),
-    letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя',
-    shitHeap = [
-    'Неважно, кто мы такие, важно то, какой у нас план',
-    'Я сам творю свою удачу',
-    'Не проблемы должны толкать вас в спину, а вперед вести мечты',
-    'Пессимист видит трудность в любой возможности; оптимист – видит возможность в любой трудности',
-    'Мы — рабы своих привычек. Измени свои привычки, и изменится твоя жизнь',
-    'Нельзя казнить помиловать'
-    ],
-    initialShit = shitHeap[random(0, shitHeap.length - 1)];
-
-canvas.width = width;
-canvas.height = height;
-
 function random(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -437,9 +402,5 @@ class Letter{
         return this;
     }
 }
-
-let board = new Board(ctx, initialShit, cols, rows, fontSiz, cellWidth, cellHeight, letters);
-
-console.log('board', board);
 
 // board.draw();
