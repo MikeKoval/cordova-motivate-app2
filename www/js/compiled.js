@@ -442,7 +442,7 @@ var Letter = function () {
     return Letter;
 }();
 
-var board = new Board(ctx, initialShit, cols, rows, fontSiz, cellWidth, cellHeight, letters);
+var board = new Board(ctx, initialShit, cols, rows, 22, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
