@@ -247,31 +247,11 @@ class Board {
     loop(velocity, direction) {
         //Board.context.transform(1, 0, 0, 1, canvas.width, canvas.height/2);
         //
-        if(this.looper) clearInterval(this.looper);
-        
-        var image = new Image(),
-            CanvasYSize = canvas.height,
-            y = 0;
-        image.src = canvas.toDataURL("image/png");
-        var translate = Math.floor(velocity*direction)*2;
-        this.looper = setInterval(() => {
-            Board.context.clearRect(0,0,canvas.width,canvas.height);
+        let step = direction === 'up' ? 1 : -1;
 
-            //translate += Math.ceil(velocity*direction);
-            // console.log('transform', translate);
-
-            if (y > (CanvasYSize)) { y = 0; }
-            //draw aditional image
-
-            if (y > (CanvasYSize-image.height)) {
-                console.log('draw more');
-                ctx.drawImage(image,0,y-canvas.height+1,image.width,image.height);
-            }
-
-            ctx.drawImage(image,0,y, canvas.width, canvas.height);
-
-            y += translate;
-        }, 10);
+        for(let i = 0; i < board.colsNum; i += 1){
+            setInterval(function(){board.cols[i].shift(step);}, random(10,20));
+        }
 
         // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
     }

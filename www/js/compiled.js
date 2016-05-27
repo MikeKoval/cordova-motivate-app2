@@ -221,8 +221,6 @@ var Board = function () {
     }, {
         key: 'initEvents',
         value: function initEvents() {
-
-            alert('INIT ');
             var boardElm = document.getElementById('example'),
                 hammertime = new Hammer(boardElm, {});
             hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL }), self = this;
@@ -248,33 +246,17 @@ var Board = function () {
         value: function loop(velocity, direction) {
             //Board.context.transform(1, 0, 0, 1, canvas.width, canvas.height/2);
             //
-            if (this.looper) clearInterval(this.looper);
+            var step = direction === 'up' ? 1 : -1;
 
-            var image = new Image(),
-                CanvasYSize = canvas.height,
-                y = 0;
-            image.src = canvas.toDataURL("image/png");
-            var translate = Math.floor(velocity * direction) * 2;
-            this.looper = setInterval(function () {
-                Board.context.clearRect(0, 0, canvas.width, canvas.height);
+            var _loop = function _loop(i) {
+                setInterval(function () {
+                    board.cols[i].shift(step);
+                }, random(10, 20));
+            };
 
-                //translate += Math.ceil(velocity*direction);
-                // console.log('transform', translate);
-
-                if (y > CanvasYSize) {
-                    y = 0;
-                }
-                //draw aditional image
-
-                if (y > CanvasYSize - image.height) {
-                    console.log('draw more');
-                    ctx.drawImage(image, 0, y - canvas.height + 1, image.width, image.height);
-                }
-
-                ctx.drawImage(image, 0, y, canvas.width, canvas.height);
-
-                y += translate;
-            }, 10);
+            for (var i = 0; i < board.colsNum; i += 1) {
+                _loop(i);
+            }
 
             // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
         }
