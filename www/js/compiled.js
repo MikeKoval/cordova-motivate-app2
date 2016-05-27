@@ -251,7 +251,7 @@ var Board = function () {
             var _loop = function _loop(i) {
                 setInterval(function () {
                     board.cols[i].shift(step);
-                }, random(10, 20));
+                }, random(20, 100));
             };
 
             for (var i = 0; i < board.colsNum; i += 1) {

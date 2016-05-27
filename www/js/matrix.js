@@ -250,7 +250,7 @@ class Board {
         let step = direction === 'up' ? 1 : -1;
 
         for(let i = 0; i < board.colsNum; i += 1){
-            setInterval(function(){board.cols[i].shift(step);}, random(10,20));
+            setInterval(function(){board.cols[i].shift(step);}, random(20,100));
         }
 
         // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
