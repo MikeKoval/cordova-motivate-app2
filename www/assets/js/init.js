@@ -63,21 +63,39 @@ let loop = (velocity, direction) => {
     //Board.context.transform(1, 0, 0, 1, canvas.width, canvas.height/2);
     //
     let step = direction === 'up' ? 1 : -1;
-    
-    setInterval(function(){
-        for(let i = 0; i < board.colsNum; i += 1){
-            board.cols[i].shift(step);
-        }
-    }, 50);
 
+    // var spinNumber = 0;
+    var timer = (spinNumber, speed, nextTimer) => {
+        var interval = setInterval(() => {
+            if(!spinNumber){
+                clearInterval(interval);
+                if(nextTimer)
+                    nextTimer();
+                return false;
+            }
 
+            for(let i = 0; i < board.colsNum; i += 1){
+                board.cols[i].shift(step);
+            }
+
+            spinNumber--;
+        }, speed)
+    };
+
+    timer(3*board.rowsNum, 20, function(){
+        timer(2*board.rowsNum, 40, function() {
+            timer(1 * board.rowsNum, 80);
+        });
+    });
+    // timer(120, 70);
+    // timer(60, 90);
     // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
 };
 
 canvas.width = width;
 canvas.height = height;
 
-let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters);
+let board = new Board(ctx, 'SWIPE', cols, rows, fontSize, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
