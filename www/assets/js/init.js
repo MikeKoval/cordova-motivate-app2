@@ -1,5 +1,6 @@
 import {Board} from './board';
 
+alert(requestAnimationFrame);
 alert(1);
 
 let getWindowSizes = () => {
@@ -40,8 +41,8 @@ let cols = 17,
 let initEvents = () => {
     var boardElm = document.getElementById('example'),
         hammertime = new Hammer(boardElm, {});
-    hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL }),
-        self = board;
+    hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+        let self = board;
 
     var mc = new Hammer.Manager(boardElm, {
         recognizers: [
