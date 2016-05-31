@@ -455,6 +455,8 @@ var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHei
 
 console.log('board', board);
 
+alert(requestAnimationFrame);
+
 initEvents();
 
 function easeOutBack(x, t, b, c, d, s) {
@@ -502,6 +504,8 @@ var interval = setInterval(function () {
         // clearInterval(interval);
     }
 }, 10);
+
+alert(interval);
 
 function animate(options) {
     board.draw();
