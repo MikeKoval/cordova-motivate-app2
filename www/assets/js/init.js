@@ -94,11 +94,13 @@ let loop = (velocity, dir) => {
 canvas.width = width;
 canvas.height = height;
 
+alert(requestAnimationFrame);
+
 let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
-alert(requestAnimationFrame);
+alert(2);
 
 initEvents();
 
@@ -151,8 +153,6 @@ var interval = setInterval(() => {
         // clearInterval(interval);
     }
 }, 10);
-
-alert(interval);
 
 function animate(options) {
     board.draw();

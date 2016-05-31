@@ -453,11 +453,13 @@ var initEvents = function initEvents() {
 canvas.width = width;
 canvas.height = height;
 
+alert(requestAnimationFrame);
+
 var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
-alert(requestAnimationFrame);
+alert(2);
 
 initEvents();
 
@@ -506,8 +508,6 @@ var interval = setInterval(function () {
         // clearInterval(interval);
     }
 }, 10);
-
-alert(interval);
 
 function animate(options) {
     board.draw();
