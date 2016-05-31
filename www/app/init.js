@@ -190,6 +190,22 @@ var Board = function () {
         set: function set(value) {
             this._phrase = value;
         }
+    }, {
+        key: 'offset',
+        get: function get() {
+            return this._offset;
+        },
+        set: function set(value) {
+            this._offset = value;
+        }
+    }, {
+        key: 'startY',
+        get: function get() {
+            return this._startY;
+        },
+        set: function set(value) {
+            this._startY = value;
+        }
     }], [{
         key: 'random',
         value: function random(min, max) {
@@ -244,13 +260,15 @@ var Board = function () {
 
         this.cols = [];
 
+        this.offset = 0;
+
         for (var index = 0; index < this.colsNum; index += 1) {
             this.cols[index] = new Column(index, this.rowsNum);
         }
 
         this.erase();
 
-        this.setPhrase(this.initialShit);
+        this.startY = this.setPhrase(this.initialShit);
     }
 
     _createClass(Board, [{
@@ -345,6 +363,8 @@ var Board = function () {
 
             var startY = Math.ceil((this.rowsNum - paragraph.length) / 2);
 
+            this.offset = startY;
+
             for (var y = startY, _i2 = 0; y < startY + paragraph.length; y += 1, _i2 += 1) {
                 var startX = Math.ceil(this.colsNum / 2) - Math.ceil(paragraph[_i2].length / 2);
 
@@ -366,6 +386,29 @@ var Board = function () {
                     this.cols[x].letters[y].set(paragraph[_i2][_j]).erase().enable().draw();
                 }
             }
+
+            return startY;
+        }
+    }, {
+        key: 'shift',
+        value: function shift(step) {
+            step = step % this.rowsNum;
+
+            for (var i = 0; i < this.colsNum; i += 1) {
+                this.cols[i].shift(step);
+            }
+
+            this.offset = (this.offset - step) % this.rowsNum;
+
+            if (this.offset < 0) {
+                this.offset = this.rowsNum + this.offset;
+            }
+
+            if (this.offset >= this.rowsNum) {
+                this.offset = this.rowsNum - this.offset;
+            }
+
+            return this;
         }
     }]);
 
@@ -426,27 +469,23 @@ var loop = function loop(velocity, direction) {
     var step = direction === 'up' ? 1 : -1;
 
     // var spinNumber = 0;
-    var timer = function timer(spinNumber, speed, nextTimer) {
-        var interval = setInterval(function () {
-            if (!spinNumber) {
-                clearInterval(interval);
-                if (nextTimer) nextTimer();
-                return false;
-            }
+    // var timer = (spinNumber, speed, nextTimer) => {
+    //     var interval = setInterval(() => {
+    //         if(!spinNumber){
+    //             clearInterval(interval);
+    //             if(nextTimer)
+    //                 nextTimer();
+    //             return false;
+    //         }
+    //
+    //         for(let i = 0; i < board.colsNum; i += 1){
+    //             board.cols[i].shift(step);
+    //         }
+    //
+    //         spinNumber--;
+    //     }, speed)
+    // };
 
-            for (var i = 0; i < board.colsNum; i += 1) {
-                board.cols[i].shift(step);
-            }
-
-            spinNumber--;
-        }, speed);
-    };
-
-    timer(3 * board.rowsNum, 20, function () {
-        timer(2 * board.rowsNum, 40, function () {
-            timer(1 * board.rowsNum, 80);
-        });
-    });
     // timer(120, 70);
     // timer(60, 90);
     // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
@@ -461,3 +500,39 @@ console.log('board', board);
 
 board.draw();
 initEvents();
+
+function animate(options) {
+    var start = performance.now();
+
+    var time;
+
+    var interval = setInterval(function () {
+        if (options.acceleration > 1) {
+            time++;
+            options.acceleration -= 0.05;
+        } else {
+            clearInterval(interval);
+        }
+    }, 10);
+
+    requestAnimationFrame(function anim(time) {
+        var timeFraction = (time - start) / options.duration;
+        start = performance.now();
+        if (timeFraction < 0) timeFraction = 0.5;
+
+        console.log(Math.ceil(options.acceleration));
+
+        board.shift(-Math.ceil(options.acceleration));
+
+        if (options.acceleration > 2) {
+            requestAnimationFrame(anim);
+        } else if (board.offset != board.startY) {
+            requestAnimationFrame(anim);
+        }
+    });
+}
+
+animate({
+    duration: 100,
+    acceleration: 5
+});

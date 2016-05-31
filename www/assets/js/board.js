@@ -42,6 +42,20 @@ class Board {
         this._phrase = value;
     }
 
+    get offset() {
+        return this._offset;
+    }
+    set offset(value) {
+        this._offset = value;
+    }
+
+    get startY() {
+        return this._startY;
+    }
+    set startY(value) {
+        this._startY = value;
+    }
+
     constructor(context, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters) {
         Board.context = context;
 
@@ -55,13 +69,15 @@ class Board {
 
         this.cols = [];
 
+        this.offset = 0;
+
         for(let index = 0; index < this.colsNum; index += 1){
             this.cols[index] = new Column(index, this.rowsNum);
         }
 
         this.erase();
 
-        this.setPhrase(this.initialShit);
+        this.startY =  this.setPhrase(this.initialShit);
     }
 
     rebuild() {
@@ -156,6 +172,8 @@ class Board {
 
         let startY = Math.ceil((this.rowsNum - paragraph.length)/2);
 
+        this.offset = startY;
+
         for (let y = startY, i = 0; y < startY + paragraph.length; y += 1, i += 1) {
             let startX = Math.ceil(this.colsNum/2) - Math.ceil(paragraph[i].length/2);
 
@@ -184,5 +202,27 @@ class Board {
                     .draw();
             }
         }
+
+        return startY;
+    }
+
+    shift(step) {
+        step = step % this.rowsNum;
+
+        for(let i = 0; i < this.colsNum; i += 1){
+            this.cols[i].shift(step);
+        }
+
+        this.offset = (this.offset - step) % this.rowsNum;
+
+        if(this.offset < 0){
+            this.offset = this.rowsNum + this.offset;
+        }
+
+        if(this.offset >= this.rowsNum){
+            this.offset = this.rowsNum - this.offset;
+        }
+
+        return this;
     }
 }

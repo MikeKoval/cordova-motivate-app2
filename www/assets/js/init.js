@@ -65,28 +65,24 @@ let loop = (velocity, direction) => {
     let step = direction === 'up' ? 1 : -1;
 
     // var spinNumber = 0;
-    var timer = (spinNumber, speed, nextTimer) => {
-        var interval = setInterval(() => {
-            if(!spinNumber){
-                clearInterval(interval);
-                if(nextTimer)
-                    nextTimer();
-                return false;
-            }
+    // var timer = (spinNumber, speed, nextTimer) => {
+    //     var interval = setInterval(() => {
+    //         if(!spinNumber){
+    //             clearInterval(interval);
+    //             if(nextTimer)
+    //                 nextTimer();
+    //             return false;
+    //         }
+    //
+    //         for(let i = 0; i < board.colsNum; i += 1){
+    //             board.cols[i].shift(step);
+    //         }
+    //
+    //         spinNumber--;
+    //     }, speed)
+    // };
 
-            for(let i = 0; i < board.colsNum; i += 1){
-                board.cols[i].shift(step);
-            }
 
-            spinNumber--;
-        }, speed)
-    };
-
-    timer(3*board.rowsNum, 20, function(){
-        timer(2*board.rowsNum, 40, function() {
-            timer(1 * board.rowsNum, 80);
-        });
-    });
     // timer(120, 70);
     // timer(60, 90);
     // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
@@ -102,3 +98,49 @@ console.log('board', board);
 board.draw();
 initEvents();
 
+function bounce(timeFraction) {
+    for (var a = 0, b = 1, result; 1; a += b, b /= 2) {
+        if (timeFraction >= (7 - 4 * a) / 11) {
+            return -Math.pow((11 - 6 * a - 11 * timeFraction) / 4, 2) + Math.pow(b, 2)
+        }
+    }
+}
+
+function animate(options) {
+    var start = performance.now();
+
+    var time;
+
+    var interval = setInterval(() => {
+        if(options.acceleration > 1){
+            time++;
+            options.acceleration -= 0.05;
+        }
+        else{
+            clearInterval(interval);
+        }
+    }, 10);
+
+    requestAnimationFrame(function anim(time) {
+        var timeFraction = (time - start) / options.duration;
+        start = performance.now();
+        if (timeFraction < 0) timeFraction = 0.5;
+
+        console.log(Math.ceil(options.acceleration));
+
+        board.shift(- Math.ceil(options.acceleration));
+
+        if(options.acceleration > 2){
+            requestAnimationFrame(anim);
+        }
+        else if(board.offset != board.startY) {
+            requestAnimationFrame(anim);
+        }
+
+    });
+}
+
+animate({
+    duration: 100,
+    acceleration: 5
+});
