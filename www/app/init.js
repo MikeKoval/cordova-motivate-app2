@@ -422,9 +422,6 @@ var Board = function () {
     };
 })();
 
-alert(requestAnimationFrame);
-alert(1);
-
 var getWindowSizes = function getWindowSizes() {
     var w = window,
         d = document,
@@ -478,13 +475,9 @@ var initEvents = function initEvents() {
 canvas.width = width;
 canvas.height = height;
 
-alert(requestAnimationFrame);
-
 var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters);
 
 console.log('board', board);
-
-alert(2);
 
 initEvents();
 
@@ -501,7 +494,7 @@ console.info(height);
 
 var interval = setInterval(function () {
     if (Math.abs(shift) <= height) {
-        time += 10;
+        time += 20;
 
         if (Math.abs(shift) >= height / 2 && !hasNewPhrase) {
             // board.setPhrase();
@@ -532,7 +525,7 @@ var interval = setInterval(function () {
         hasNewPhrase = false;
         // clearInterval(interval);
     }
-}, 10);
+}, 50);
 
 function animate(options) {
     board.draw();
