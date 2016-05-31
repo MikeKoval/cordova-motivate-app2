@@ -75,8 +75,6 @@ class Board {
             this.cols[index] = new Column(index, this.rowsNum);
         }
 
-        this.erase();
-
         this.startY =  this.setPhrase(this.initialShit);
     }
 
@@ -93,24 +91,22 @@ class Board {
 
     draw() {
         for(let index = 0; index < this.colsNum; index += 1) {
-            this.cols[index].erase().draw();
+            this.cols[index].draw();
         }
 
         return this;
     }
 
-    erase() {
-        for(let index = 0; index < this.colsNum; index += 1) {
-            this.cols[index].erase();
-        }
+    enablePhrase() {
+        let paragraph = this.buildParagraph();
 
-        return this;
-    }
+        for (let y = this.startY, i = 0; y < this.startY + paragraph.length; y += 1, i += 1) {
+            let startX = Math.ceil(this.colsNum/2) - Math.ceil(paragraph[i].length/2);
 
-    enable() {
-        for(let index = 0; index < this.colsNum; index += 1) {
-            this.cols[index]
-                .enable();
+            for(let x = startX, j = 0; x < startX + paragraph[i].length; x += 1, j += 1){
+                this.cols[x].letters[y]
+                    .enable();
+            }
         }
 
         return this;
@@ -125,14 +121,8 @@ class Board {
         return this;
     }
 
-    setPhrase(phrase) {
-        this.phrase = phrase;
-
-        this
-            .rebuild()
-            .disable()
-            .draw();
-
+    buildParagraph() {
+        let phrase = this.phrase;
 
         phrase = phrase.replace(/,\s/gi, ",");
         phrase = phrase.replace(/\.\s/gi, ".");
@@ -168,7 +158,20 @@ class Board {
 
         console.info(rows, 'rows');
 
-        let paragraph = rows;
+        return rows;
+    }
+
+    setPhrase(phrase) {
+        this.phrase = phrase;
+
+        this
+            .rebuild()
+            .disable();
+
+
+
+
+        let paragraph = this.buildParagraph();
 
         let startY = Math.ceil((this.rowsNum - paragraph.length)/2);
 
@@ -180,9 +183,7 @@ class Board {
             for(let x = startX, j = 0; x < startX + paragraph[i].length; x += 1, j += 1){
                 if(paragraph[i][j] === ',' || paragraph[i][j] === '.'){
                     this.cols[x].letters[y]
-                        .set('')
-                        .erase()
-                        .draw();
+                        .set('');
 
                     continue;
                 }
@@ -197,9 +198,7 @@ class Board {
 
                 this.cols[x].letters[y]
                     .set(paragraph[i][j])
-                    .erase()
-                    .enable()
-                    .draw();
+                    .enable();
             }
         }
 
@@ -207,12 +206,12 @@ class Board {
     }
 
     shift(step) {
-        step = step % this.rowsNum;
+        //step = step % this.rowsNum;
 
         for(let i = 0; i < this.colsNum; i += 1){
             this.cols[i].shift(step);
         }
-
+/*
         this.offset = (this.offset - step) % this.rowsNum;
 
         if(this.offset < 0){
@@ -221,8 +220,7 @@ class Board {
 
         if(this.offset >= this.rowsNum){
             this.offset = this.rowsNum - this.offset;
-        }
-
+        }*/
         return this;
     }
 }

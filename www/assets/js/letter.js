@@ -64,8 +64,12 @@ class Letter{
         return this;
     }
 
-    draw() {
-        this.drawSymbol();
+    draw(y) {
+
+        Board.context.fillStyle = 'rgb(238,232,170)';
+        Board.context.fillRect(Board.cellWidth*this.col.index, y, Board.cellWidth, Board.cellHeight);
+
+        this.drawSymbol(y);
 
         if(this.punctuation){
             Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth/2, this.index*Board.cellHeight + Board.fontSize);
@@ -74,22 +78,15 @@ class Letter{
         return this;
     }
 
-    _drawEnabledSymbol() {
+    _drawEnabledSymbol(y) {
         Board.context.font = Letter.font;
         Board.context.fillStyle = Letter.enabledFillStyle;
-        Board.context.fillText(this.name, this.col.index * Board.cellWidth, this.index*Board.cellHeight + Board.fontSize);
+        Board.context.fillText(this.name, this.col.index * Board.cellWidth, y + Board.fontSize);
     }
 
-    _drawDisabledSymbol() {
+    _drawDisabledSymbol(y) {
         Board.context.font = Letter.font;
         Board.context.fillStyle = Letter.disabledFillStyle;
-        Board.context.fillText(this.name, this.col.index * Board.cellWidth, this.index*Board.cellHeight + Board.fontSize);
-    }
-
-    erase() {
-        Board.context.fillStyle = 'rgb(238,232,170)';
-        Board.context.fillRect(Board.cellWidth*this.col.index, Board.cellHeight*this.index, Board.cellWidth, Board.cellHeight);
-
-        return this;
+        Board.context.fillText(this.name, this.col.index * Board.cellWidth, y + Board.fontSize);
     }
 }

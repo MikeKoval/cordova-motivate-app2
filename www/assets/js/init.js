@@ -14,14 +14,14 @@ let getWindowSizes = () => {
     };
 };
 
-let cols = 25,
-    rows = 30,
+let cols = 17,
+    rows = 20,
     width = getWindowSizes().width,
     height = getWindowSizes().height,
 
     cellWidth = width / cols,
     cellHeight = height / rows,
-    fontSize = 22,//cellWidth < cellHeight ? cellWidth/2 : cellHeight/2,
+    fontSize = 20,//cellWidth < cellHeight ? cellWidth/2 : cellHeight/2,
     canvas = document.getElementById("example"),
     ctx = canvas.getContext('2d'),
     letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя',
@@ -49,20 +49,21 @@ let initEvents = () => {
     });
 
     mc.on("swipe", function(ev) {
-        var direction = ev.velocity < 0 ? 1 : -1,
+        var dir = ev.velocity < 0 ? 1 : -1,
             velocity = Math.abs(ev.velocity);
-        console.log('velocity', velocity);
-        console.log('direction', direction);
 
-        self.setPhrase(dictionary[Board.random(0, dictionary.length - 1)]);
-        loop(velocity, direction);
+        time = 0;
+        shift = 0;
+        direction = -dir;
+        // self.setPhrase(dictionary[Board.random(0, dictionary.length - 1)]);
+        //loop(velocity, direction);
     });
 };
 
-let loop = (velocity, direction) => {
+let loop = (velocity, dir) => {
     //Board.context.transform(1, 0, 0, 1, canvas.width, canvas.height/2);
-    //
-    let step = direction === 'up' ? 1 : -1;
+
+
 
     // var spinNumber = 0;
     // var timer = (spinNumber, speed, nextTimer) => {
@@ -91,56 +92,82 @@ let loop = (velocity, direction) => {
 canvas.width = width;
 canvas.height = height;
 
-let board = new Board(ctx, 'SWIPE', cols, rows, fontSize, cellWidth, cellHeight, letters);
+let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
-board.draw();
 initEvents();
+
+function easeOutBack(x, t, b, c, d, s) {
+    if (s == undefined) s = 1.70158;
+    return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
+}
 
 function bounce(timeFraction) {
     for (var a = 0, b = 1, result; 1; a += b, b /= 2) {
         if (timeFraction >= (7 - 4 * a) / 11) {
-            return -Math.pow((11 - 6 * a - 11 * timeFraction) / 4, 2) + Math.pow(b, 2)
+            return -Math.pow((11 - 6 * a - 11 * timeFraction) / 4, 2) + Math.pow(b, 2);
         }
     }
 }
 
-function animate(options) {
-    var start = performance.now();
-
-    var time;
-
-    var interval = setInterval(() => {
-        if(options.acceleration > 1){
-            time++;
-            options.acceleration -= 0.05;
-        }
-        else{
-            clearInterval(interval);
-        }
-    }, 10);
-
-    requestAnimationFrame(function anim(time) {
-        var timeFraction = (time - start) / options.duration;
-        start = performance.now();
-        if (timeFraction < 0) timeFraction = 0.5;
-
-        console.log(Math.ceil(options.acceleration));
-
-        board.shift(- Math.ceil(options.acceleration));
-
-        if(options.acceleration > 2){
-            requestAnimationFrame(anim);
-        }
-        else if(board.offset != board.startY) {
-            requestAnimationFrame(anim);
-        }
-
-    });
+// преобразователь в easeOut
+function makeEaseOut(timing) {
+    return function(timeFraction) {
+        return 1 - timing(1 - timeFraction);
+    }
 }
 
-animate({
-    duration: 100,
-    acceleration: 5
-});
+var bounceEaseOut = makeEaseOut(bounce);
+
+
+var time,
+    shift = height,
+    acceleration = 10,
+    direction = 1,
+    hasNewPhrase = false;
+
+console.info(height);
+
+var interval = setInterval(() => {
+    if (Math.abs(shift) <= height){
+        time+=10;
+
+        if(Math.abs(shift) >= height / 2 && !hasNewPhrase){
+            // board.setPhrase();
+
+
+            let newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+
+            while(true){
+                newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+
+                if(newPhrase !== board.phrase){
+                    break;
+                }
+            }
+
+            board.setPhrase(newPhrase);
+
+            // console.info(newPhrase + ' ' + board.phrase);
+
+            hasNewPhrase = true;
+        }
+
+        // console.log(easeOutBack(null, time, 0, height, 1000));
+        // shift += direction * bounceEaseOut(time / 1000) * 1000;
+        shift = direction * easeOutBack(null, time, 0, height, 1000);
+        board.shift(shift);
+    }
+    else if(Math.abs(shift) >= height && hasNewPhrase) {
+        // console.info(shift, 'shift');
+        hasNewPhrase = false;
+        // clearInterval(interval);
+    }
+}, 10);
+
+function animate(options) {
+    board.draw();
+    requestAnimationFrame(animate);
+}
+animate();

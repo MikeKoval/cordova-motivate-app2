@@ -79,8 +79,12 @@ var Letter = function () {
         }
     }, {
         key: 'draw',
-        value: function draw() {
-            this.drawSymbol();
+        value: function draw(y) {
+
+            Board.context.fillStyle = 'rgb(238,232,170)';
+            Board.context.fillRect(Board.cellWidth * this.col.index, y, Board.cellWidth, Board.cellHeight);
+
+            this.drawSymbol(y);
 
             if (this.punctuation) {
                 Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth / 2, this.index * Board.cellHeight + Board.fontSize);
@@ -90,25 +94,17 @@ var Letter = function () {
         }
     }, {
         key: '_drawEnabledSymbol',
-        value: function _drawEnabledSymbol() {
+        value: function _drawEnabledSymbol(y) {
             Board.context.font = Letter.font;
             Board.context.fillStyle = Letter.enabledFillStyle;
-            Board.context.fillText(this.name, this.col.index * Board.cellWidth, this.index * Board.cellHeight + Board.fontSize);
+            Board.context.fillText(this.name, this.col.index * Board.cellWidth, y + Board.fontSize);
         }
     }, {
         key: '_drawDisabledSymbol',
-        value: function _drawDisabledSymbol() {
+        value: function _drawDisabledSymbol(y) {
             Board.context.font = Letter.font;
             Board.context.fillStyle = Letter.disabledFillStyle;
-            Board.context.fillText(this.name, this.col.index * Board.cellWidth, this.index * Board.cellHeight + Board.fontSize);
-        }
-    }, {
-        key: 'erase',
-        value: function erase() {
-            Board.context.fillStyle = 'rgb(238,232,170)';
-            Board.context.fillRect(Board.cellWidth * this.col.index, Board.cellHeight * this.index, Board.cellWidth, Board.cellHeight);
-
-            return this;
+            Board.context.fillText(this.name, this.col.index * Board.cellWidth, y + Board.fontSize);
         }
     }]);
 
@@ -119,6 +115,7 @@ var Column = function () {
     function Column(index, length) {
         _classCallCheck(this, Column);
 
+        this._shift = 0;
         this.index = index;
         this.length = length || 25;
         this.letters = [];
@@ -131,50 +128,36 @@ var Column = function () {
     _createClass(Column, [{
         key: 'draw',
         value: function draw() {
-            for (var index = 0; index < this.length; index += 1) {
-                this.letters[index].erase().draw();
+            var y = this._shift,
+                height = this.length * Board.cellHeight;
+
+            if (y < 0) {
+                y += height;
+            }
+            if (y > height) {
+                y %= height;
             }
 
-            return this;
-        }
-    }, {
-        key: 'erase',
-        value: function erase() {
-            Board.context.fillStyle = 'rgb(238,232,170)';
-            Board.context.fillRect(Board.cellWidth * this.index, 0, Board.cellWidth, Board.cellHeight * this.length);
-
-            return this;
-        }
-    }, {
-        key: 'enable',
-        value: function enable() {
             for (var index = 0; index < this.length; index += 1) {
-                this.letters[index].erase().enable().draw();
+                this.letters[index].draw(y - height);
+                this.letters[index].draw(y);
+                y += Board.cellHeight;
             }
-
             return this;
         }
     }, {
         key: 'disable',
         value: function disable() {
             for (var index = 0; index < this.length; index += 1) {
-                this.letters[index].erase().disable().draw();
+                this.letters[index].disable();
             }
 
             return this;
         }
     }, {
         key: 'shift',
-        value: function shift(count) {
-            this.letters = this.letters.slice(count).concat(this.letters.slice(0, count));
-
-            for (var index = 0; index < this.length; index += 1) {
-                this.letters[index].index = index;
-            }
-
-            this.erase().draw();
-
-            return this;
+        value: function shift(value) {
+            this._shift = value;
         }
     }]);
 
@@ -266,8 +249,6 @@ var Board = function () {
             this.cols[index] = new Column(index, this.rowsNum);
         }
 
-        this.erase();
-
         this.startY = this.setPhrase(this.initialShit);
     }
 
@@ -287,25 +268,22 @@ var Board = function () {
         key: 'draw',
         value: function draw() {
             for (var index = 0; index < this.colsNum; index += 1) {
-                this.cols[index].erase().draw();
+                this.cols[index].draw();
             }
 
             return this;
         }
     }, {
-        key: 'erase',
-        value: function erase() {
-            for (var index = 0; index < this.colsNum; index += 1) {
-                this.cols[index].erase();
-            }
+        key: 'enablePhrase',
+        value: function enablePhrase() {
+            var paragraph = this.buildParagraph();
 
-            return this;
-        }
-    }, {
-        key: 'enable',
-        value: function enable() {
-            for (var index = 0; index < this.colsNum; index += 1) {
-                this.cols[index].enable();
+            for (var y = this.startY, i = 0; y < this.startY + paragraph.length; y += 1, i += 1) {
+                var startX = Math.ceil(this.colsNum / 2) - Math.ceil(paragraph[i].length / 2);
+
+                for (var x = startX, j = 0; x < startX + paragraph[i].length; x += 1, j += 1) {
+                    this.cols[x].letters[y].enable();
+                }
             }
 
             return this;
@@ -320,11 +298,9 @@ var Board = function () {
             return this;
         }
     }, {
-        key: 'setPhrase',
-        value: function setPhrase(phrase) {
-            this.phrase = phrase;
-
-            this.rebuild().disable().draw();
+        key: 'buildParagraph',
+        value: function buildParagraph() {
+            var phrase = this.phrase;
 
             phrase = phrase.replace(/,\s/gi, ",");
             phrase = phrase.replace(/\.\s/gi, ".");
@@ -359,31 +335,40 @@ var Board = function () {
 
             console.info(rows, 'rows');
 
-            var paragraph = rows;
+            return rows;
+        }
+    }, {
+        key: 'setPhrase',
+        value: function setPhrase(phrase) {
+            this.phrase = phrase;
+
+            this.rebuild().disable();
+
+            var paragraph = this.buildParagraph();
 
             var startY = Math.ceil((this.rowsNum - paragraph.length) / 2);
 
             this.offset = startY;
 
-            for (var y = startY, _i2 = 0; y < startY + paragraph.length; y += 1, _i2 += 1) {
-                var startX = Math.ceil(this.colsNum / 2) - Math.ceil(paragraph[_i2].length / 2);
+            for (var y = startY, i = 0; y < startY + paragraph.length; y += 1, i += 1) {
+                var startX = Math.ceil(this.colsNum / 2) - Math.ceil(paragraph[i].length / 2);
 
-                for (var x = startX, _j = 0; x < startX + paragraph[_i2].length; x += 1, _j += 1) {
-                    if (paragraph[_i2][_j] === ',' || paragraph[_i2][_j] === '.') {
-                        this.cols[x].letters[y].set('').erase().draw();
+                for (var x = startX, j = 0; x < startX + paragraph[i].length; x += 1, j += 1) {
+                    if (paragraph[i][j] === ',' || paragraph[i][j] === '.') {
+                        this.cols[x].letters[y].set('');
 
                         continue;
                     }
 
-                    if (paragraph[_i2][_j + 1] === ',') {
+                    if (paragraph[i][j + 1] === ',') {
                         this.cols[x].letters[y].setPunctuation(',');
                     }
 
-                    if (paragraph[_i2][_j + 1] === '.') {
+                    if (paragraph[i][j + 1] === '.') {
                         this.cols[x].letters[y].setPunctuation('.');
                     }
 
-                    this.cols[x].letters[y].set(paragraph[_i2][_j]).erase().enable().draw();
+                    this.cols[x].letters[y].set(paragraph[i][j]).enable();
                 }
             }
 
@@ -392,22 +377,21 @@ var Board = function () {
     }, {
         key: 'shift',
         value: function shift(step) {
-            step = step % this.rowsNum;
+            //step = step % this.rowsNum;
 
             for (var i = 0; i < this.colsNum; i += 1) {
                 this.cols[i].shift(step);
             }
-
-            this.offset = (this.offset - step) % this.rowsNum;
-
-            if (this.offset < 0) {
-                this.offset = this.rowsNum + this.offset;
-            }
-
-            if (this.offset >= this.rowsNum) {
-                this.offset = this.rowsNum - this.offset;
-            }
-
+            /*
+                    this.offset = (this.offset - step) % this.rowsNum;
+            
+                    if(this.offset < 0){
+                        this.offset = this.rowsNum + this.offset;
+                    }
+            
+                    if(this.offset >= this.rowsNum){
+                        this.offset = this.rowsNum - this.offset;
+                    }*/
             return this;
         }
     }]);
@@ -429,13 +413,13 @@ var getWindowSizes = function getWindowSizes() {
     };
 };
 
-var cols = 25;
-var rows = 30;
+var cols = 17;
+var rows = 20;
 var width = getWindowSizes().width;
 var height = getWindowSizes().height;
 var cellWidth = width / cols;
 var cellHeight = height / rows;
-var fontSize = 22;
+var fontSize = 20;
 var canvas = document.getElementById("example");
 var ctx = canvas.getContext('2d');
 var letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
@@ -453,86 +437,74 @@ var initEvents = function initEvents() {
     });
 
     mc.on("swipe", function (ev) {
-        var direction = ev.velocity < 0 ? 1 : -1,
+        var dir = ev.velocity < 0 ? 1 : -1,
             velocity = Math.abs(ev.velocity);
-        console.log('velocity', velocity);
-        console.log('direction', direction);
 
-        self.setPhrase(dictionary[Board.random(0, dictionary.length - 1)]);
-        loop(velocity, direction);
+        time = 0;
+        shift = 0;
+        direction = -dir;
+        // self.setPhrase(dictionary[Board.random(0, dictionary.length - 1)]);
+        //loop(velocity, direction);
     });
-};
-
-var loop = function loop(velocity, direction) {
-    //Board.context.transform(1, 0, 0, 1, canvas.width, canvas.height/2);
-    //
-    var step = direction === 'up' ? 1 : -1;
-
-    // var spinNumber = 0;
-    // var timer = (spinNumber, speed, nextTimer) => {
-    //     var interval = setInterval(() => {
-    //         if(!spinNumber){
-    //             clearInterval(interval);
-    //             if(nextTimer)
-    //                 nextTimer();
-    //             return false;
-    //         }
-    //
-    //         for(let i = 0; i < board.colsNum; i += 1){
-    //             board.cols[i].shift(step);
-    //         }
-    //
-    //         spinNumber--;
-    //     }, speed)
-    // };
-
-    // timer(120, 70);
-    // timer(60, 90);
-    // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
 };
 
 canvas.width = width;
 canvas.height = height;
 
-var board = new Board(ctx, 'SWIPE', cols, rows, fontSize, cellWidth, cellHeight, letters);
+var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters);
 
 console.log('board', board);
 
-board.draw();
 initEvents();
 
-function animate(options) {
-    var start = performance.now();
-
-    var time;
-
-    var interval = setInterval(function () {
-        if (options.acceleration > 1) {
-            time++;
-            options.acceleration -= 0.05;
-        } else {
-            clearInterval(interval);
-        }
-    }, 10);
-
-    requestAnimationFrame(function anim(time) {
-        var timeFraction = (time - start) / options.duration;
-        start = performance.now();
-        if (timeFraction < 0) timeFraction = 0.5;
-
-        console.log(Math.ceil(options.acceleration));
-
-        board.shift(-Math.ceil(options.acceleration));
-
-        if (options.acceleration > 2) {
-            requestAnimationFrame(anim);
-        } else if (board.offset != board.startY) {
-            requestAnimationFrame(anim);
-        }
-    });
+function easeOutBack(x, t, b, c, d, s) {
+    if (s == undefined) s = 1.70158;
+    return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
 }
 
-animate({
-    duration: 100,
-    acceleration: 5
-});
+var time;
+var shift = height;
+var direction = 1;
+var hasNewPhrase = false;
+console.info(height);
+
+var interval = setInterval(function () {
+    if (Math.abs(shift) <= height) {
+        time += 10;
+
+        if (Math.abs(shift) >= height / 2 && !hasNewPhrase) {
+            // board.setPhrase();
+
+            var newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+
+            while (true) {
+                newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+
+                if (newPhrase !== board.phrase) {
+                    break;
+                }
+            }
+
+            board.setPhrase(newPhrase);
+
+            // console.info(newPhrase + ' ' + board.phrase);
+
+            hasNewPhrase = true;
+        }
+
+        // console.log(easeOutBack(null, time, 0, height, 1000));
+        // shift += direction * bounceEaseOut(time / 1000) * 1000;
+        shift = direction * easeOutBack(null, time, 0, height, 1000);
+        board.shift(shift);
+    } else if (Math.abs(shift) >= height && hasNewPhrase) {
+        // console.info(shift, 'shift');
+        hasNewPhrase = false;
+        // clearInterval(interval);
+    }
+}, 10);
+
+function animate(options) {
+    board.draw();
+    requestAnimationFrame(animate);
+}
+animate();

@@ -4,6 +4,7 @@ import {Letter} from './letter';
 export
 class Column {
     constructor(index, length){
+        this._shift = 0;
         this.index = index;
         this.length = length || 25;
         this.letters = [];
@@ -19,53 +20,33 @@ class Column {
     }
 
     draw() {
-        for(let index = 0; index < this.length; index += 1) {
-            this.letters[index].erase().draw();
+        var y = this._shift,
+            height = this.length * Board.cellHeight;
+
+        if (y < 0) {
+            y += height;
+        }
+        if (y > height) {
+            y %= height;
         }
 
-        return this;
-    }
-
-    erase() {
-        Board.context.fillStyle = 'rgb(238,232,170)';
-        Board.context.fillRect(Board.cellWidth*this.index, 0, Board.cellWidth, Board.cellHeight*this.length);
-
-        return this;
-    }
-
-    enable() {
-        for(let index = 0; index < this.length; index += 1) {
-            this.letters[index]
-                .erase()
-                .enable()
-                .draw();
+        for(let index = 0; index < this.length; index += 1){
+            this.letters[index].draw(y - height);
+            this.letters[index].draw(y);
+            y += Board.cellHeight;
         }
-
         return this;
     }
 
     disable() {
         for(let index = 0; index < this.length; index += 1) {
-            this.letters[index]
-                .erase()
-                .disable()
-                .draw();
+            this.letters[index].disable();
         }
 
         return this;
     }
 
-    shift(count){
-        this.letters = this.letters.slice(count).concat(this.letters.slice(0,count));
-
-        for(let index = 0; index < this.length; index += 1){
-            this.letters[index].index = index;
-        }
-
-        this
-            .erase()
-            .draw();
-
-        return this;
+    shift(value){
+        this._shift = value;
     }
 }
