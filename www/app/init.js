@@ -399,6 +399,7 @@ var Board = function () {
     return Board;
 }();
 
+alert(requestAnimationFrame);
 alert(1);
 
 var getWindowSizes = function getWindowSizes() {
@@ -430,7 +431,8 @@ var initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 var initEvents = function initEvents() {
     var boardElm = document.getElementById('example'),
         hammertime = new Hammer(boardElm, {});
-    hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL }), self = board;
+    hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+    var self = board;
 
     var mc = new Hammer.Manager(boardElm, {
         recognizers: [
