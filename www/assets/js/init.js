@@ -1,5 +1,7 @@
 import {Board} from './board';
 
+alert(1);
+
 let getWindowSizes = () => {
     let w = window,
         d = document,
