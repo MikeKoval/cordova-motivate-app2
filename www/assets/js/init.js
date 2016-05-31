@@ -139,7 +139,7 @@ console.info(height);
 
 var interval = setInterval(() => {
     if (Math.abs(shift) <= height){
-        time+=20;
+        time+=1;
 
         if(Math.abs(shift) >= height / 2 && !hasNewPhrase){
             // board.setPhrase();
