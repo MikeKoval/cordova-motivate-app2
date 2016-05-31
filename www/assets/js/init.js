@@ -96,30 +96,14 @@ let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHei
 
 console.log('board', board);
 
+alert(requestAnimationFrame);
+
 initEvents();
 
 function easeOutBack(x, t, b, c, d, s) {
     if (s == undefined) s = 1.70158;
     return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
 }
-
-function bounce(timeFraction) {
-    for (var a = 0, b = 1, result; 1; a += b, b /= 2) {
-        if (timeFraction >= (7 - 4 * a) / 11) {
-            return -Math.pow((11 - 6 * a - 11 * timeFraction) / 4, 2) + Math.pow(b, 2);
-        }
-    }
-}
-
-// преобразователь в easeOut
-function makeEaseOut(timing) {
-    return function(timeFraction) {
-        return 1 - timing(1 - timeFraction);
-    }
-}
-
-var bounceEaseOut = makeEaseOut(bounce);
-
 
 var time,
     shift = height,
@@ -165,6 +149,8 @@ var interval = setInterval(() => {
         // clearInterval(interval);
     }
 }, 10);
+
+alert(interval);
 
 function animate(options) {
     board.draw();
