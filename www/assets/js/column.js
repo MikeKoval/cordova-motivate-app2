@@ -37,6 +37,14 @@ class Column {
         }
         return this;
     }
+
+    disable() {
+        for(let index = 0; index < this.length; index += 1) {
+            this.letters[index].disable();
+        }
+
+        return this;
+    }
     
     shift(value){
         this._shift = value;

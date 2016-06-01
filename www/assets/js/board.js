@@ -150,6 +150,15 @@ class Board {
         return this;
     }
 
+    disable() {
+        for(let index = 0; index < this.colsNum; index += 1) {
+            this.cols[index]
+                .disable();
+        }
+
+        return this;
+    }
+
     buildParagraph() {
         let phrase = this.phrase;
 
@@ -194,7 +203,8 @@ class Board {
         this.phrase = phrase;
 
         this
-            .rebuild();
+            .rebuild()
+            .disable();
 
 
 

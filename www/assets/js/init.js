@@ -110,7 +110,7 @@ var time,
 
 var interval = setInterval(() => {
     if (Math.abs(shift) <= height){
-        time+=1;
+        time+=10;
 
         if(Math.abs(shift) >= height / 2 && !hasNewPhrase){
             // board.setPhrase();
@@ -137,7 +137,7 @@ var interval = setInterval(() => {
     else if(Math.abs(shift) >= height && hasNewPhrase) {
         hasNewPhrase = false;
     }
-}, 10);
+}, 16);
 
 function animate(options) {
     board.draw();

@@ -142,6 +142,15 @@ var Column = function () {
             return this;
         }
     }, {
+        key: 'disable',
+        value: function disable() {
+            for (var index = 0; index < this.length; index += 1) {
+                this.letters[index].disable();
+            }
+
+            return this;
+        }
+    }, {
         key: 'shift',
         value: function shift(value) {
             this._shift = value;
@@ -317,6 +326,15 @@ var Board = function () {
             return this;
         }
     }, {
+        key: 'disable',
+        value: function disable() {
+            for (var index = 0; index < this.colsNum; index += 1) {
+                this.cols[index].disable();
+            }
+
+            return this;
+        }
+    }, {
         key: 'buildParagraph',
         value: function buildParagraph() {
             var phrase = this.phrase;
@@ -361,7 +379,7 @@ var Board = function () {
         value: function setPhrase(phrase) {
             this.phrase = phrase;
 
-            this.rebuild();
+            this.rebuild().disable();
 
             var paragraph = this.buildParagraph();
 
@@ -500,7 +518,7 @@ var direction = 1;
 var hasNewPhrase = false;
 var interval = setInterval(function () {
     if (Math.abs(shift) <= height) {
-        time += 1;
+        time += 10;
 
         if (Math.abs(shift) >= height / 2 && !hasNewPhrase) {
             // board.setPhrase();
@@ -525,7 +543,7 @@ var interval = setInterval(function () {
     } else if (Math.abs(shift) >= height && hasNewPhrase) {
         hasNewPhrase = false;
     }
-}, 10);
+}, 16);
 
 function animate(options) {
     board.draw();
