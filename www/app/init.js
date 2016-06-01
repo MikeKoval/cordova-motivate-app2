@@ -108,10 +108,11 @@ var Letter = function () {
 }();
 
 var Column = function () {
-    function Column(index, length) {
+    function Column(context, index, length) {
         _classCallCheck(this, Column);
 
         this._shift = 0;
+        this.context = context;
         this.index = index;
         this.length = length || 25;
         this.letters = [];
@@ -251,7 +252,7 @@ var Board = function () {
         this.offset = 0;
 
         for (var index = 0; index < this.colsNum; index += 1) {
-            this.cols[index] = new Column(index, this.rowsNum);
+            this.cols[index] = new Column(Board.context, index, this.rowsNum);
         }
 
         this.startY = this.setPhrase(this.initialShit);
@@ -284,7 +285,7 @@ var Board = function () {
                 this.cols[index].draw();
             }
 
-            // this.drawGradient();
+            this.drawGradient();
 
             return this;
         }
@@ -476,27 +477,25 @@ var ctx = canvas.getContext('2d');
 var letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
 var dictionary = ['Неважно, кто мы такие, важно то, какой у нас план', 'Я сам творю свою удачу', 'Не проблемы должны толкать вас в спину, а вперед вести мечты', 'Пессимист видит трудность в любой возможности; оптимист – видит возможность в любой трудности', 'Мы — рабы своих привычек. Измени свои привычки, и изменится твоя жизнь', 'Нельзя казнить помиловать'];
 var initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+var boardElm = document.getElementById('example');
+var hammertime = new Hammer(boardElm, {});
+hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+var self = board;var mc = new Hammer.Manager(boardElm, {
+    recognizers: [
+    // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
+    [Hammer.Swipe, { direction: Hammer.DIRECTION_VERTICAL }]]
+});
+
+var swipeEventHandler = function swipeEventHandler(ev) {
+    var dir = ev.velocity < 0 ? 1 : -1,
+        velocity = Math.abs(ev.velocity);
+
+    time = 0;
+    shift = 0;
+    direction = -dir;
+};
+
 var initEvents = function initEvents() {
-    var boardElm = document.getElementById('example'),
-        hammertime = new Hammer(boardElm, {});
-    hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
-    var self = board;
-
-    var mc = new Hammer.Manager(boardElm, {
-        recognizers: [
-        // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
-        [Hammer.Swipe, { direction: Hammer.DIRECTION_VERTICAL }]]
-    });
-
-    var swipeEventHandler = function swipeEventHandler(ev) {
-        var dir = ev.velocity < 0 ? 1 : -1,
-            velocity = Math.abs(ev.velocity);
-
-        time = 0;
-        shift = 0;
-        direction = -dir;
-    };
-
     mc.on("swipe", swipeEventHandler);
 };
 
@@ -520,6 +519,10 @@ var interval = setInterval(function () {
     if (Math.abs(shift) <= height) {
         time += 10;
 
+        if (time) {
+            mc.off("swipe");
+        }
+
         if (Math.abs(shift) >= height / 2 && !hasNewPhrase) {
             // board.setPhrase();
 
@@ -542,6 +545,7 @@ var interval = setInterval(function () {
         board.shift(shift);
     } else if (Math.abs(shift) >= height && hasNewPhrase) {
         hasNewPhrase = false;
+        mc.on("swipe", swipeEventHandler);
     }
 }, 16);
 

@@ -3,8 +3,9 @@ import {Letter} from './letter';
 
 export
 class Column {
-    constructor(index, length){
+    constructor(context, index, length){
         this._shift = 0;
+        this.context = context;
         this.index = index;
         this.length = length || 25;
         this.letters = [];

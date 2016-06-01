@@ -80,7 +80,7 @@ class Board {
         this.offset = 0;
 
         for(let index = 0; index < this.colsNum; index += 1){
-            this.cols[index] = new Column(index, this.rowsNum);
+            this.cols[index] = new Column(Board.context, index, this.rowsNum);
         }
 
         this.startY =  this.setPhrase(this.initialShit);
@@ -109,7 +109,7 @@ class Board {
             this.cols[index].draw();
         }
 
-        // this.drawGradient();
+        this.drawGradient();
 
         return this;
     }

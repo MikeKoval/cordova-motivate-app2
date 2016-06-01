@@ -63,30 +63,28 @@ let cols = 27,
     ],
     initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 
+var boardElm = document.getElementById('example'),
+    hammertime = new Hammer(boardElm, {});
+hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+let self = board;z
 
+var mc = new Hammer.Manager(boardElm, {
+    recognizers: [
+        // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
+        [Hammer.Swipe,{ direction: Hammer.DIRECTION_VERTICAL }],
+    ]
+});
+
+let swipeEventHandler = function(ev) {
+    var dir = ev.velocity < 0 ? 1 : -1,
+        velocity = Math.abs(ev.velocity);
+    
+    time = 0;
+    shift = 0;
+    direction = -dir;
+};
 
 let initEvents = () => {
-    var boardElm = document.getElementById('example'),
-        hammertime = new Hammer(boardElm, {});
-    hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
-        let self = board;
-
-    var mc = new Hammer.Manager(boardElm, {
-        recognizers: [
-            // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
-            [Hammer.Swipe,{ direction: Hammer.DIRECTION_VERTICAL }],
-        ]
-    });
-
-    let swipeEventHandler = function(ev) {
-        var dir = ev.velocity < 0 ? 1 : -1,
-            velocity = Math.abs(ev.velocity);
-
-        time = 0;
-        shift = 0;
-        direction = -dir;
-    };
-
     mc.on("swipe", swipeEventHandler);
 };
 
@@ -112,6 +110,10 @@ var interval = setInterval(() => {
     if (Math.abs(shift) <= height){
         time+=10;
 
+        if(time){
+            mc.off("swipe");
+        }
+
         if(Math.abs(shift) >= height / 2 && !hasNewPhrase){
             // board.setPhrase();
 
@@ -136,6 +138,7 @@ var interval = setInterval(() => {
     }
     else if(Math.abs(shift) >= height && hasNewPhrase) {
         hasNewPhrase = false;
+        mc.on("swipe", swipeEventHandler);
     }
 }, 16);
 
