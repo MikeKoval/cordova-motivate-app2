@@ -72,7 +72,7 @@ class Letter{
         this.drawSymbol(y);
 
         if(this.punctuation){
-            Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth/2, this.index*Board.cellHeight + Board.fontSize);
+            Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth/2, y + Board.fontSize);
         }
 
         return this;

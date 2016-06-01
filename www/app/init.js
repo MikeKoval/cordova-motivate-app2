@@ -87,7 +87,7 @@ var Letter = function () {
             this.drawSymbol(y);
 
             if (this.punctuation) {
-                Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth / 2, this.index * Board.cellHeight + Board.fontSize);
+                Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth / 2, y + Board.fontSize);
             }
 
             return this;
@@ -525,7 +525,7 @@ var interval = setInterval(function () {
         hasNewPhrase = false;
         // clearInterval(interval);
     }
-}, 50);
+}, 10);
 
 function animate(options) {
     board.draw();

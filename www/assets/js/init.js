@@ -172,7 +172,7 @@ var interval = setInterval(() => {
         hasNewPhrase = false;
         // clearInterval(interval);
     }
-}, 50);
+}, 10);
 
 function animate(options) {
     board.draw();
