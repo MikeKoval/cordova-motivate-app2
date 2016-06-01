@@ -56,7 +56,14 @@ class Board {
         this._startY = value;
     }
 
-    constructor(context, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters) {
+    static get paddingLeft() {
+        return this._paddingLeft;
+    }
+    static set paddingLeft(value) {
+        this._paddingLeft = value;
+    }
+
+    constructor(context, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, letters) {
         Board.context = context;
 
         this.colsNum = cols || 15;
@@ -65,6 +72,7 @@ class Board {
         Board.fontSize = fontSize || 20;
         Board.cellWidth = cellWidth || Board.fontSize*2;
         Board.cellHeight = cellHeight || Board.fontSize*2;
+        Board.paddingLeft = paddingLeft;
         Board.letters = letters || 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
 
         this.cols = [];
@@ -76,6 +84,10 @@ class Board {
         }
 
         this.startY =  this.setPhrase(this.initialShit);
+    }
+
+    clearBackground(){
+        Board.context.clearRect(0, 0,  Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum);
     }
 
     rebuild() {
@@ -90,11 +102,37 @@ class Board {
     }
 
     draw() {
+        this.clearBackground();
+
         for(let index = 0; index < this.colsNum; index += 1) {
+
             this.cols[index].draw();
         }
 
+        this.drawGradient();
+
         return this;
+    }
+
+    drawGradient() {
+        var grd;
+
+        grd = Board.context.createLinearGradient(0, 0, 0, Board.cellHeight * this.rowsNum / 4);
+        grd.addColorStop(0, 'rgba(250, 249, 231, 0.9)');
+        grd.addColorStop(0.7, 'rgba(250, 249, 231, 0.5)');
+        grd.addColorStop(1, 'rgba(250, 249, 231 ,0)');
+
+        Board.context.fillStyle = grd;
+        Board.context.fillRect(0, 0, Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum / 4);
+
+        grd = Board.context.createLinearGradient(0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4), 0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4) + Board.cellHeight * this.rowsNum / 4);
+
+        grd.addColorStop(0, 'rgba(250, 249, 231 ,0)');
+        grd.addColorStop(0.3, 'rgba(250, 249, 231, 0.5)');
+        grd.addColorStop(1, 'rgba(250, 249, 231, 0.9)');
+
+        Board.context.fillStyle = grd;
+        Board.context.fillRect(0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4), Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum / 4);
     }
 
     enablePhrase() {
@@ -107,15 +145,6 @@ class Board {
                 this.cols[x].letters[y]
                     .enable();
             }
-        }
-
-        return this;
-    }
-
-    disable() {
-        for(let index = 0; index < this.colsNum; index += 1) {
-            this.cols[index]
-                .disable();
         }
 
         return this;
@@ -156,7 +185,7 @@ class Board {
          End replace
          */
 
-        console.info(rows, 'rows');
+        // console.info(rows, 'rows');
 
         return rows;
     }
@@ -165,8 +194,7 @@ class Board {
         this.phrase = phrase;
 
         this
-            .rebuild()
-            .disable();
+            .rebuild();
 
 
 
@@ -206,21 +234,10 @@ class Board {
     }
 
     shift(step) {
-        //step = step % this.rowsNum;
-
         for(let i = 0; i < this.colsNum; i += 1){
             this.cols[i].shift(step);
         }
-/*
-        this.offset = (this.offset - step) % this.rowsNum;
 
-        if(this.offset < 0){
-            this.offset = this.rowsNum + this.offset;
-        }
-
-        if(this.offset >= this.rowsNum){
-            this.offset = this.rowsNum - this.offset;
-        }*/
         return this;
     }
 }

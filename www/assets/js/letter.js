@@ -31,7 +31,7 @@ class Letter{
 
         Letter.font = Board.fontSize + "px monospace";
         Letter.enabledFillStyle = '#000';
-        Letter.disabledFillStyle = 'rgba(0,0,0,0.2)';
+        Letter.disabledFillStyle = '#C6C6BA';
 
         this.disable();
     }
@@ -65,14 +65,10 @@ class Letter{
     }
 
     draw(y) {
-
-        Board.context.fillStyle = 'rgb(238,232,170)';
-        Board.context.fillRect(Board.cellWidth*this.col.index, y, Board.cellWidth, Board.cellHeight);
-
         this.drawSymbol(y);
 
         if(this.punctuation){
-            Board.context.fillText(this.punctuation, this.col.index * Board.cellWidth + Board.cellWidth/2, y + Board.fontSize);
+            Board.context.fillText(this.punctuation, Board.paddingLeft + this.col.index * Board.fontSize * 0.6 + Board.fontSize/2, y + Board.fontSize);
         }
 
         return this;
@@ -81,12 +77,12 @@ class Letter{
     _drawEnabledSymbol(y) {
         Board.context.font = Letter.font;
         Board.context.fillStyle = Letter.enabledFillStyle;
-        Board.context.fillText(this.name, this.col.index * Board.cellWidth, y + Board.fontSize);
+        Board.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize);
     }
 
     _drawDisabledSymbol(y) {
         Board.context.font = Letter.font;
         Board.context.fillStyle = Letter.disabledFillStyle;
-        Board.context.fillText(this.name, this.col.index * Board.cellWidth, y + Board.fontSize);
+        Board.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize);
     }
 }

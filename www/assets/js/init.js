@@ -40,14 +40,16 @@ let getWindowSizes = () => {
     };
 };
 
-let cols = 17,
+let cols = 27,
     rows = 20,
     width = getWindowSizes().width,
     height = getWindowSizes().height,
 
     cellWidth = width / cols,
     cellHeight = height / rows,
-    fontSize = 20,//cellWidth < cellHeight ? cellWidth/2 : cellHeight/2,
+    fontSize = 18,//cellWidth < cellHeight ? cellWidth/2 : cellHeight/2,
+    drawingAreaWidth =  cols * fontSize * 0.6,
+    paddingLeft = (width - drawingAreaWidth)/2,
     canvas = document.getElementById("example"),
     ctx = canvas.getContext('2d'),
     letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя',
@@ -60,6 +62,8 @@ let cols = 17,
         'Нельзя казнить помиловать'
     ],
     initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+
+
 
 let initEvents = () => {
     var boardElm = document.getElementById('example'),
@@ -74,53 +78,22 @@ let initEvents = () => {
         ]
     });
 
-    mc.on("swipe", function(ev) {
+    let swipeEventHandler = function(ev) {
         var dir = ev.velocity < 0 ? 1 : -1,
             velocity = Math.abs(ev.velocity);
 
         time = 0;
         shift = 0;
         direction = -dir;
-        // self.setPhrase(dictionary[Board.random(0, dictionary.length - 1)]);
-        //loop(velocity, direction);
-    });
-};
+    };
 
-let loop = (velocity, dir) => {
-    //Board.context.transform(1, 0, 0, 1, canvas.width, canvas.height/2);
-
-
-
-    // var spinNumber = 0;
-    // var timer = (spinNumber, speed, nextTimer) => {
-    //     var interval = setInterval(() => {
-    //         if(!spinNumber){
-    //             clearInterval(interval);
-    //             if(nextTimer)
-    //                 nextTimer();
-    //             return false;
-    //         }
-    //
-    //         for(let i = 0; i < board.colsNum; i += 1){
-    //             board.cols[i].shift(step);
-    //         }
-    //
-    //         spinNumber--;
-    //     }, speed)
-    // };
-
-
-    // timer(120, 70);
-    // timer(60, 90);
-    // Board.context.drawImage(Board.context,0,0,canvas.width, canvas.height)
+    mc.on("swipe", swipeEventHandler);
 };
 
 canvas.width = width;
 canvas.height = height;
 
-let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, letters);
-
-console.log('board', board);
+let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, letters);
 
 initEvents();
 
@@ -134,8 +107,6 @@ var time,
     acceleration = 10,
     direction = 1,
     hasNewPhrase = false;
-
-console.info(height);
 
 var interval = setInterval(() => {
     if (Math.abs(shift) <= height){
@@ -157,20 +128,14 @@ var interval = setInterval(() => {
 
             board.setPhrase(newPhrase);
 
-            // console.info(newPhrase + ' ' + board.phrase);
-
             hasNewPhrase = true;
         }
-
-        // console.log(easeOutBack(null, time, 0, height, 1000));
-        // shift += direction * bounceEaseOut(time / 1000) * 1000;
-        shift = direction * easeOutBack(null, time, 0, height, 1000);
+        
+        shift = direction * easeOutBack(null, time, 0, height, 1000) || 0;
         board.shift(shift);
     }
     else if(Math.abs(shift) >= height && hasNewPhrase) {
-        // console.info(shift, 'shift');
         hasNewPhrase = false;
-        // clearInterval(interval);
     }
 }, 10);
 
