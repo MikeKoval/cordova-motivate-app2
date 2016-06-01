@@ -284,7 +284,7 @@ var Board = function () {
                 this.cols[index].draw();
             }
 
-            this.drawGradient();
+            // this.drawGradient();
 
             return this;
         }
