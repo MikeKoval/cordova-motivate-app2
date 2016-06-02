@@ -109,7 +109,7 @@ let removeSwipeEvent = () => {
 function animate(options) {
     var start = performance.now();
 
-
+    alert("start" + start);
 
     requestAnimationFrame(function animate(time) {
         // timeFraction от 0 до 1
