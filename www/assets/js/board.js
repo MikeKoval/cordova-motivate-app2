@@ -13,25 +13,25 @@ class Board {
         Board._context = value;
     }
 
-    static get fontSize() {
+    get fontSize() {
         return Board._fontSize;
     }
 
-    static set fontSize(value) {
+    set fontSize(value) {
         Board._fontSize = value;
     }
 
-    static get cellWidth() {
+    get cellWidth() {
         return Board._cellWidth;
     }
-    static set cellWidth(value) {
+    set cellWidth(value) {
         Board._cellWidth = value;
     }
 
-    static get cellHeight() {
+    get cellHeight() {
         return Board._cellHeight;
     }
-    static set cellHeight(value) {
+    set cellHeight(value) {
         Board._cellHeight = value;
     }
 
@@ -56,11 +56,18 @@ class Board {
         this._startY = value;
     }
 
-    static get paddingLeft() {
+    get paddingLeft() {
         return this._paddingLeft;
     }
-    static set paddingLeft(value) {
+    set paddingLeft(value) {
         this._paddingLeft = value;
+    }
+
+    get initPaddingTop() {
+        return this._initPaddingTop;
+    }
+    set initPaddingTop(value) {
+        this._initPaddingTop = value;
     }
 
     get paddingTop() {
@@ -77,11 +84,12 @@ class Board {
         this.colsNum = cols || 15;
         this.rowsNum = rows || 25;
         this.initialShit = initialShit || 'HELLO';
-        Board.fontSize = fontSize || 20;
-        Board.cellWidth = cellWidth || Board.fontSize*2;
-        Board.cellHeight = cellHeight || Board.fontSize*2;
-        Board.paddingLeft = paddingLeft;
+        this.fontSize = fontSize || 20;
+        this.cellWidth = cellWidth || this.fontSize*2;
+        this.cellHeight = cellHeight || this.fontSize*2;
+        this.paddingLeft = paddingLeft;
         this.paddingTop = paddingTop;
+        this.initPaddingTop = paddingTop;
         Board.letters = letters || 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
 
         console.info(paddingTop, 'padidngTop');
@@ -98,7 +106,7 @@ class Board {
     }
 
     clearBackground(){
-        this.context.clearRect(0, this.paddingTop,  Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum);
+        this.context.clearRect(0, this.paddingTop,  this.cellWidth * this.colsNum, this.cellHeight * this.rowsNum);
     }
 
     rebuild() {
@@ -128,22 +136,22 @@ class Board {
     drawGradient() {
         var grd;
 
-        grd = this.context.createLinearGradient(0, 0, 0, Board.cellHeight * this.rowsNum / 4);
+        grd = this.context.createLinearGradient(0, 0, 0, this.cellHeight * this.rowsNum / 4);
         grd.addColorStop(0, 'rgba(250, 249, 231, 0.9)');
         grd.addColorStop(0.7, 'rgba(250, 249, 231, 0.5)');
         grd.addColorStop(1, 'rgba(250, 249, 231 ,0)');
 
         this.context.fillStyle = grd;
-        this.context.fillRect(0, 0, Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum / 4);
+        this.context.fillRect(0, 0, this.cellWidth * this.colsNum, this.cellHeight * this.rowsNum / 4);
 
-        grd = this.context.createLinearGradient(0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4), 0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4) + Board.cellHeight * this.rowsNum / 4);
+        grd = this.context.createLinearGradient(0, this.cellHeight * (this.rowsNum - this.rowsNum / 4), 0, this.cellHeight * (this.rowsNum - this.rowsNum / 4) + this.cellHeight * this.rowsNum / 4);
 
         grd.addColorStop(0, 'rgba(250, 249, 231 ,0)');
         grd.addColorStop(0.3, 'rgba(250, 249, 231, 0.5)');
         grd.addColorStop(1, 'rgba(250, 249, 231, 0.9)');
 
         this.context.fillStyle = grd;
-        this.context.fillRect(0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4), Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum / 4);
+        this.context.fillRect(0, this.cellHeight * (this.rowsNum - this.rowsNum / 4), this.cellWidth * this.colsNum, this.cellHeight * this.rowsNum / 4);
     }
 
     enablePhrase() {

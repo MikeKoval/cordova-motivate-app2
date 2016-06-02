@@ -5,7 +5,22 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Letter = function () {
-    _createClass(Letter, null, [{
+    _createClass(Letter, [{
+        key: 'x',
+        get: function get() {
+            return this.col.board.paddingLeft + this.col.index * this.col.board.fontSize * 0.6;
+        }
+    }, {
+        key: 'y',
+        get: function get() {
+            return this.index * this.col.board.cellHeight + this.col.board.fontSize + this.col.board.paddingTop;
+        }
+    }, {
+        key: 'punctuationX',
+        get: function get() {
+            return this.col.board.paddingLeft + this.col.index * this.col.board.fontSize * 0.6 + this.col.board.fontSize / 2;
+        }
+    }], [{
         key: 'font',
         get: function get() {
             return Letter._font;
@@ -40,7 +55,7 @@ var Letter = function () {
         this.punctuation = punctuation || '';
         this.context = this.col.board.context;
 
-        Letter.font = Board.fontSize + "px monospace";
+        Letter.font = this.col.board.fontSize + "px monospace";
         Letter.enabledFillStyle = '#000';
         Letter.disabledFillStyle = '#C6C6BA';
 
@@ -80,28 +95,28 @@ var Letter = function () {
         }
     }, {
         key: 'draw',
-        value: function draw(y) {
-            this.drawSymbol(y);
+        value: function draw() {
+            this.drawSymbol();
 
             if (this.punctuation) {
-                this.context.fillText(this.punctuation, Board.paddingLeft + this.col.index * Board.fontSize * 0.6 + Board.fontSize / 2, y + Board.fontSize + this.col.board.paddingTop);
+                this.context.fillText(this.punctuation, this.punctuationX, this.y);
             }
 
             return this;
         }
     }, {
         key: '_drawEnabledSymbol',
-        value: function _drawEnabledSymbol(y) {
+        value: function _drawEnabledSymbol() {
             this.context.font = Letter.font;
             this.context.fillStyle = Letter.enabledFillStyle;
-            this.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize + this.col.board.paddingTop);
+            this.context.fillText(this.name, this.x, this.y);
         }
     }, {
         key: '_drawDisabledSymbol',
-        value: function _drawDisabledSymbol(y) {
+        value: function _drawDisabledSymbol() {
             this.context.font = Letter.font;
             this.context.fillStyle = Letter.disabledFillStyle;
-            this.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize + this.col.board.paddingTop);
+            this.context.fillText(this.name, this.x, this.y);
         }
     }]);
 
@@ -113,9 +128,8 @@ var Column = function () {
         _classCallCheck(this, Column);
 
         this.board = board;
-        this._shift = 0;
         this.index = index;
-        this.length = length || 25;
+        this.length = length;
         this.letters = [];
 
         for (var _index = 0; _index < this.length; _index += 1) {
@@ -126,21 +140,10 @@ var Column = function () {
     _createClass(Column, [{
         key: 'draw',
         value: function draw() {
-            var y = this._shift,
-                height = this.length * Board.cellHeight;
-
-            if (y < 0) {
-                y += height;
-            }
-            if (y > height) {
-                y %= height;
-            }
-
             for (var index = 0; index < this.length; index += 1) {
-                // this.letters[index].draw(y - height);
-                this.letters[index].draw(y);
-                y += Board.cellHeight;
+                this.letters[index].draw();
             }
+
             return this;
         }
     }, {
@@ -151,11 +154,6 @@ var Column = function () {
             }
 
             return this;
-        }
-    }, {
-        key: 'shift',
-        value: function shift(value) {
-            this._shift = value;
         }
     }]);
 
@@ -170,43 +168,6 @@ var Board = function () {
         },
         set: function set(value) {
             Board._context = value;
-        }
-    }, {
-        key: 'phrase',
-        get: function get() {
-            return this._phrase;
-        },
-        set: function set(value) {
-            this._phrase = value;
-        }
-    }, {
-        key: 'offset',
-        get: function get() {
-            return this._offset;
-        },
-        set: function set(value) {
-            this._offset = value;
-        }
-    }, {
-        key: 'startY',
-        get: function get() {
-            return this._startY;
-        },
-        set: function set(value) {
-            this._startY = value;
-        }
-    }, {
-        key: 'paddingTop',
-        get: function get() {
-            return this._paddingTop;
-        },
-        set: function set(value) {
-            this._paddingTop = value;
-        }
-    }], [{
-        key: 'random',
-        value: function random(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
     }, {
         key: 'fontSize',
@@ -233,12 +194,57 @@ var Board = function () {
             Board._cellHeight = value;
         }
     }, {
+        key: 'phrase',
+        get: function get() {
+            return this._phrase;
+        },
+        set: function set(value) {
+            this._phrase = value;
+        }
+    }, {
+        key: 'offset',
+        get: function get() {
+            return this._offset;
+        },
+        set: function set(value) {
+            this._offset = value;
+        }
+    }, {
+        key: 'startY',
+        get: function get() {
+            return this._startY;
+        },
+        set: function set(value) {
+            this._startY = value;
+        }
+    }, {
         key: 'paddingLeft',
         get: function get() {
             return this._paddingLeft;
         },
         set: function set(value) {
             this._paddingLeft = value;
+        }
+    }, {
+        key: 'initPaddingTop',
+        get: function get() {
+            return this._initPaddingTop;
+        },
+        set: function set(value) {
+            this._initPaddingTop = value;
+        }
+    }, {
+        key: 'paddingTop',
+        get: function get() {
+            return this._paddingTop;
+        },
+        set: function set(value) {
+            this._paddingTop = value;
+        }
+    }], [{
+        key: 'random',
+        value: function random(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
     }]);
 
@@ -250,11 +256,12 @@ var Board = function () {
         this.colsNum = cols || 15;
         this.rowsNum = rows || 25;
         this.initialShit = initialShit || 'HELLO';
-        Board.fontSize = fontSize || 20;
-        Board.cellWidth = cellWidth || Board.fontSize * 2;
-        Board.cellHeight = cellHeight || Board.fontSize * 2;
-        Board.paddingLeft = paddingLeft;
+        this.fontSize = fontSize || 20;
+        this.cellWidth = cellWidth || this.fontSize * 2;
+        this.cellHeight = cellHeight || this.fontSize * 2;
+        this.paddingLeft = paddingLeft;
         this.paddingTop = paddingTop;
+        this.initPaddingTop = paddingTop;
         Board.letters = letters || 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
 
         console.info(paddingTop, 'padidngTop');
@@ -273,7 +280,7 @@ var Board = function () {
     _createClass(Board, [{
         key: 'clearBackground',
         value: function clearBackground() {
-            this.context.clearRect(0, this.paddingTop, Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum);
+            this.context.clearRect(0, this.paddingTop, this.cellWidth * this.colsNum, this.cellHeight * this.rowsNum);
         }
     }, {
         key: 'rebuild',
@@ -306,22 +313,22 @@ var Board = function () {
         value: function drawGradient() {
             var grd;
 
-            grd = this.context.createLinearGradient(0, 0, 0, Board.cellHeight * this.rowsNum / 4);
+            grd = this.context.createLinearGradient(0, 0, 0, this.cellHeight * this.rowsNum / 4);
             grd.addColorStop(0, 'rgba(250, 249, 231, 0.9)');
             grd.addColorStop(0.7, 'rgba(250, 249, 231, 0.5)');
             grd.addColorStop(1, 'rgba(250, 249, 231 ,0)');
 
             this.context.fillStyle = grd;
-            this.context.fillRect(0, 0, Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum / 4);
+            this.context.fillRect(0, 0, this.cellWidth * this.colsNum, this.cellHeight * this.rowsNum / 4);
 
-            grd = this.context.createLinearGradient(0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4), 0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4) + Board.cellHeight * this.rowsNum / 4);
+            grd = this.context.createLinearGradient(0, this.cellHeight * (this.rowsNum - this.rowsNum / 4), 0, this.cellHeight * (this.rowsNum - this.rowsNum / 4) + this.cellHeight * this.rowsNum / 4);
 
             grd.addColorStop(0, 'rgba(250, 249, 231 ,0)');
             grd.addColorStop(0.3, 'rgba(250, 249, 231, 0.5)');
             grd.addColorStop(1, 'rgba(250, 249, 231, 0.9)');
 
             this.context.fillStyle = grd;
-            this.context.fillRect(0, Board.cellHeight * (this.rowsNum - this.rowsNum / 4), Board.cellWidth * this.colsNum, Board.cellHeight * this.rowsNum / 4);
+            this.context.fillRect(0, this.cellHeight * (this.rowsNum - this.rowsNum / 4), this.cellWidth * this.colsNum, this.cellHeight * this.rowsNum / 4);
         }
     }, {
         key: 'enablePhrase',
@@ -484,36 +491,26 @@ var cellHeight = height / rows;
 var fontSize = 18;
 var drawingAreaWidth = cols * fontSize * 0.6;
 var paddingLeft = (width - drawingAreaWidth) / 2;
-var canvas = document.getElementById("example");
+var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext('2d');
 var letters = 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
 var dictionary = ['Неважно, кто мы такие, важно то, какой у нас план', 'Я сам творю свою удачу', 'Не проблемы должны толкать вас в спину, а вперед вести мечты', 'Пессимист видит трудность в любой возможности; оптимист – видит возможность в любой трудности', 'Мы — рабы своих привычек. Измени свои привычки, и изменится твоя жизнь', 'Нельзя казнить помиловать'];
 var initialShit = dictionary[Board.random(0, dictionary.length - 1)];
-var boardElm = document.getElementById('example');
+var boardElm = document.getElementById('canvas');
 var hammertime = new Hammer(boardElm, {});
 hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+
 var mc = new Hammer.Manager(boardElm, {
-    recognizers: [
-    // RecognizerClass, [options], [recognizeWith, ...], [requireFailure, ...]
-    [Hammer.Swipe, { direction: Hammer.DIRECTION_VERTICAL }]]
+    recognizers: [[Hammer.Swipe, { direction: Hammer.DIRECTION_VERTICAL }]]
 });
 
-function bounce(timeFraction) {
-    for (var a = 0, b = 1, result; 1; a += b, b /= 2) {
-        if (timeFraction >= (7 - 4 * a) / 11) {
-            return -Math.pow((11 - 6 * a - 11 * timeFraction) / 4, 2) + Math.pow(b, 2);
-        }
-    }
-}
+var initSwipeEvent = function initSwipeEvent() {
+    mc.on("swipe", swipeEventHandler);
+};
 
-// преобразователь в easeOut
-function makeEaseOut(timing) {
-    return function (timeFraction) {
-        return 1 - timing(1 - timeFraction);
-    };
-}
-
-var bounceEaseOut = makeEaseOut(bounce);
+var removeSwipeEvent = function removeSwipeEvent() {
+    mc.off("swipe");
+};
 
 function animate(options) {
 
@@ -543,80 +540,70 @@ var swipeEventHandler = function swipeEventHandler(ev) {
 
     var boardSpinNumber = Math.round(velocity);
 
-    // console.log(bounceEaseOut);
+    console.log(boardSpinNumber);
 
     animate({
-        duration: 1000,
-        timing: bounceEaseOut,
+        duration: 2000,
+        timing: function timing(timeFraction) {
+            return timeFraction;
+        },
         draw: function draw(progress) {
-            mc.off('swipe');
+            removeSwipeEvent();
 
-            boardQueue[0].paddingTop = -height * progress;
-            boardQueue[1].paddingTop = height - height * progress;
-            boardQueue[0].draw();
-            boardQueue[1].draw();
+            for (var i = 0; i < boardQueueSize; i += 1) {
+                boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
+            }
 
-            console.log(progress);
+            for (var _i2 = 0; _i2 < boardQueueSize; _i2 += 1) {
+                boardQueue[_i2].draw();
+            }
+
+            // console.log(progress);
 
             if (progress === 1) {
-                generateNewBoard();
-                initEvents();
+                for (var _i3 = 0; _i3 < boardQueueSize; _i3 += 1) {
+                    boardQueue[_i3].initPaddingTop = boardQueue[_i3].paddingTop;
+                }
+
+                generateBoards(boardSpinNumber);
+                initSwipeEvent();
             }
         }
     });
 };
 
-function generateNewBoard() {
-    // board1 = board2;
-    var board1 = boardQueue.shift();
-
-    var newPhrase = void 0;
-    while (true) {
-        newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
-
-        if (newPhrase !== board1.phrase) {
-            break;
-        }
+var generateBoards = function generateBoards(boardNumber) {
+    for (var i = 0; i < boardNumber; i += 1) {
+        boardQueue.shift();
     }
 
-    var board2 = new Board(ctx, newPhrase, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, cellHeight * rows, letters);
+    for (var _i4 = boardQueueSize - boardNumber; _i4 < boardQueueSize; _i4 += 1) {
+        console.log(boardQueueSize);
+        if (_i4) {
+            initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 
-    boardQueue.push(board2);
+            while (true) {
+                initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 
-    board2.draw();
+                if (initialShit !== boardQueue[_i4 - 1].phrase) {
+                    break;
+                }
+            }
+        }
 
-    console.log(boardQueue);
-}
+        var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, _i4 * cellHeight * rows, letters);
+        boardQueue.push(board);
 
-var initEvents = function initEvents() {
-    mc.on("swipe", swipeEventHandler);
+        board.draw();
+    }
 };
 
-canvas.width = width;
-canvas.height = height * 2;
-
 var boardQueue = [];
+var boardQueueSize = 10;
 
-var board1 = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, 0, letters);
-boardQueue.push(board1);
+canvas.width = width;
+canvas.height = height;
 
-var newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+generateBoards(boardQueueSize);
 
-while (true) {
-    newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
-
-    if (newPhrase !== board1.phrase) {
-        break;
-    }
-}
-
-// board.setPhrase(newPhrase);
-
-var board2 = new Board(ctx, newPhrase, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, cellHeight * rows, letters);
-boardQueue.push(board2);
-
-board1.draw();
-board2.draw();
-
-// board2.draw();
-initEvents();
+initSwipeEvent();

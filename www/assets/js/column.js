@@ -5,9 +5,8 @@ export
 class Column {
     constructor(board, index, length){
         this.board = board;
-        this._shift = 0;
         this.index = index;
-        this.length = length || 25;
+        this.length = length;
         this.letters = [];
 
         for(let index = 0; index < this.length; index += 1) {
@@ -21,21 +20,10 @@ class Column {
     }
 
     draw() {
-        var y = this._shift,
-            height = this.length * Board.cellHeight;
-
-        if (y < 0) {
-            y += height;
-        }
-        if (y > height) {
-            y %= height;
-        }
-
         for(let index = 0; index < this.length; index += 1){
-            // this.letters[index].draw(y - height);
-            this.letters[index].draw(y);
-            y += Board.cellHeight;
+            this.letters[index].draw();
         }
+        
         return this;
     }
 
@@ -45,9 +33,5 @@ class Column {
         }
 
         return this;
-    }
-    
-    shift(value){
-        this._shift = value;
     }
 }

@@ -1,45 +1,53 @@
-import {Board} from './board';
-
 export
 class Letter{
-    static get font(){
+    static get font() {
         return Letter._font;
     }
-    static set font(value){
+    static set font(value) {
         Letter._font = value;
     }
 
-    static get enabledFillStyle(){
+    static get enabledFillStyle() {
         return Letter._enabledFillStyle;
     }
-    static set enabledFillStyle(value){
+    static set enabledFillStyle(value) {
         Letter._enabledFillStyle = value;
     }
 
-    static get disabledFillStyle(){
+    static get disabledFillStyle() {
         return Letter._disabledFillStyle;
     }
-    static set disabledFillStyle(value){
+    static set disabledFillStyle(value) {
         Letter._disabledFillStyle = value;
     }
 
-    constructor(parent, index, letter, punctuation){
+    get x() {
+        return this.col.board.paddingLeft + this.col.index * this.col.board.fontSize * 0.6;
+    }
+
+    get y() {
+        return this.index * this.col.board.cellHeight + this.col.board.fontSize + this.col.board.paddingTop;
+    }
+
+    get punctuationX() {
+        return this.col.board.paddingLeft + this.col.index * this.col.board.fontSize * 0.6 + this.col.board.fontSize/2;
+    }
+
+    constructor(parent, index, letter, punctuation) {
         this.col = parent;
         this.index = index;
         this.name = letter || '';
         this.punctuation = punctuation || '';
         this.context = this.col.board.context;
 
-        Letter.font = Board.fontSize + "px monospace";
+        Letter.font = this.col.board.fontSize + "px monospace";
         Letter.enabledFillStyle = '#000';
         Letter.disabledFillStyle = '#C6C6BA';
 
         this.disable();
     }
 
-    drawSymbol(){
-
-    }
+    drawSymbol() {}
 
     set(value) {
         this.name = value.toUpperCase();
@@ -47,13 +55,13 @@ class Letter{
         return this;
     }
 
-    setPunctuation(value){
+    setPunctuation(value) {
         this.punctuation = value;
 
         return this;
     }
 
-    enable(){
+    enable() {
         this.drawSymbol = this._drawEnabledSymbol;
 
         return this;
@@ -65,25 +73,37 @@ class Letter{
         return this;
     }
 
-    draw(y) {
-        this.drawSymbol(y);
+    draw() {
+        this.drawSymbol();
 
         if(this.punctuation){
-            this.context.fillText(this.punctuation, Board.paddingLeft + this.col.index * Board.fontSize * 0.6 + Board.fontSize/2, y + Board.fontSize + this.col.board.paddingTop);
+            this.context.fillText(
+                this.punctuation,
+                this.punctuationX,
+                this.y
+            );
         }
 
         return this;
     }
 
-    _drawEnabledSymbol(y) {
+    _drawEnabledSymbol() {
         this.context.font = Letter.font;
         this.context.fillStyle = Letter.enabledFillStyle;
-        this.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize + this.col.board.paddingTop);
+        this.context.fillText(
+            this.name,
+            this.x,
+            this.y
+        );
     }
 
-    _drawDisabledSymbol(y) {
+    _drawDisabledSymbol() {
         this.context.font = Letter.font;
         this.context.fillStyle = Letter.disabledFillStyle;
-        this.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize + this.col.board.paddingTop);
+        this.context.fillText(
+            this.name,
+            this.x,
+            this.y
+        );
     }
 }
