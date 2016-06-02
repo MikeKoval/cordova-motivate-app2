@@ -66,7 +66,7 @@ let cols = 27,
 var boardElm = document.getElementById('example'),
     hammertime = new Hammer(boardElm, {});
 hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
-let self = board;z
+let self = board;
 
 var mc = new Hammer.Manager(boardElm, {
     recognizers: [
@@ -75,79 +75,127 @@ var mc = new Hammer.Manager(boardElm, {
     ]
 });
 
+function bounce(timeFraction) {
+    for (var a = 0, b = 1, result; 1; a += b, b /= 2) {
+        if (timeFraction >= (7 - 4 * a) / 11) {
+            return -Math.pow((11 - 6 * a - 11 * timeFraction) / 4, 2) + Math.pow(b, 2);
+        }
+    }
+}
+
+// преобразователь в easeOut
+function makeEaseOut(timing) {
+    return function(timeFraction) {
+        return 1 - timing(1 - timeFraction);
+    }
+}
+
+var bounceEaseOut = makeEaseOut(bounce);
+
+function animate(options) {
+
+    var start = performance.now();
+
+    requestAnimationFrame(function animate(time) {
+        // timeFraction от 0 до 1
+        var timeFraction = (time - start) / options.duration;
+        if (timeFraction > 1) timeFraction = 1;
+
+        // текущее состояние анимации
+        var progress = options.timing(timeFraction);
+
+        options.draw(progress);
+
+        if (timeFraction < 1) {
+            requestAnimationFrame(animate);
+        }
+
+    });
+}
+
 let swipeEventHandler = function(ev) {
     var dir = ev.velocity < 0 ? 1 : -1,
         velocity = Math.abs(ev.velocity);
 
-    console.log(ev.velocity);
+    console.info(velocity, 'velocity');
+    
+    let boardSpinNumber = Math.round(velocity);
 
-    time = 0;
-    shift = 0;
-    direction = -dir;
+    // console.log(bounceEaseOut);
+
+    animate({
+        duration: 1000,
+        timing: bounceEaseOut,
+        draw: function(progress) {
+            mc.off('swipe');
+
+            boardQueue[0].paddingTop = - height * progress;
+            boardQueue[1].paddingTop = height - height * progress;
+            boardQueue[0].draw();
+            boardQueue[1].draw();
+
+            console.log(progress);
+
+            if(progress === 1){
+                generateNewBoard();
+                initEvents();
+            }
+        }
+    });
 };
+
+function generateNewBoard(){
+    // board1 = board2;
+    let board1 = boardQueue.shift();
+
+    let newPhrase;
+    while(true){
+        newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+
+        if(newPhrase !== board1.phrase){
+            break;
+        }
+    }
+
+    let board2 = new Board(ctx, newPhrase, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, cellHeight*rows, letters);
+
+    boardQueue.push(board2);
+
+    board2.draw();
+
+    console.log(boardQueue);
+}
 
 let initEvents = () => {
     mc.on("swipe", swipeEventHandler);
 };
 
 canvas.width = width;
-canvas.height = height;
+canvas.height = height * 2;
 
-let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, letters);
+let boardQueue = [];
 
+let board1 = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, 0, letters);
+boardQueue.push(board1);
+
+let newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+
+while(true){
+    newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
+
+    if(newPhrase !== board1.phrase){
+        break;
+    }
+}
+
+// board.setPhrase(newPhrase);
+
+let board2 = new Board(ctx, newPhrase, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, cellHeight*rows, letters);
+boardQueue.push(board2);
+
+board1.draw();
+board2.draw();
+
+// board2.draw();
 initEvents();
-
-function easeOutBack(x, t, b, c, d, s) {
-    if (s == undefined) s = 1.70158;
-    return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
-}
-
-var time,
-    shift = height,
-    timeIncrement = 10,
-    animationFraction = 16,
-    direction = 1,
-    hasNewPhrase = false;
-
-var interval = setInterval(() => {
-    if (Math.abs(shift) <= height){
-        time+=timeIncrement;
-
-        if(time){
-            mc.off("swipe");
-        }
-
-        if(Math.abs(shift) >= height / 2 && !hasNewPhrase){
-            // board.setPhrase();
-
-
-            let newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
-
-            while(true){
-                newPhrase = dictionary[Board.random(0, dictionary.length - 1)];
-
-                if(newPhrase !== board.phrase){
-                    break;
-                }
-            }
-
-            board.setPhrase(newPhrase);
-
-            hasNewPhrase = true;
-        }
-        
-        shift = direction * easeOutBack(null, time, 0, height, 1000) || 0;
-        board.shift(shift);
-    }
-    else if(Math.abs(shift) >= height && hasNewPhrase) {
-        hasNewPhrase = false;
-        mc.on("swipe", swipeEventHandler);
-    }
-}, animationFraction);
-
-function animate(options) {
-    board.draw();
-    requestAnimationFrame(animate);
-}
-animate();
 

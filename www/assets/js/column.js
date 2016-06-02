@@ -3,9 +3,9 @@ import {Letter} from './letter';
 
 export
 class Column {
-    constructor(context, index, length){
+    constructor(board, index, length){
+        this.board = board;
         this._shift = 0;
-        this.context = context;
         this.index = index;
         this.length = length || 25;
         this.letters = [];
@@ -32,7 +32,7 @@ class Column {
         }
 
         for(let index = 0; index < this.length; index += 1){
-            this.letters[index].draw(y - height);
+            // this.letters[index].draw(y - height);
             this.letters[index].draw(y);
             y += Board.cellHeight;
         }

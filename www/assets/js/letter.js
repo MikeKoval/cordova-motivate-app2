@@ -28,6 +28,7 @@ class Letter{
         this.index = index;
         this.name = letter || '';
         this.punctuation = punctuation || '';
+        this.context = this.col.board.context;
 
         Letter.font = Board.fontSize + "px monospace";
         Letter.enabledFillStyle = '#000';
@@ -68,21 +69,21 @@ class Letter{
         this.drawSymbol(y);
 
         if(this.punctuation){
-            Board.context.fillText(this.punctuation, Board.paddingLeft + this.col.index * Board.fontSize * 0.6 + Board.fontSize/2, y + Board.fontSize);
+            this.context.fillText(this.punctuation, Board.paddingLeft + this.col.index * Board.fontSize * 0.6 + Board.fontSize/2, y + Board.fontSize + this.col.board.paddingTop);
         }
 
         return this;
     }
 
     _drawEnabledSymbol(y) {
-        Board.context.font = Letter.font;
-        Board.context.fillStyle = Letter.enabledFillStyle;
-        Board.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize);
+        this.context.font = Letter.font;
+        this.context.fillStyle = Letter.enabledFillStyle;
+        this.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize + this.col.board.paddingTop);
     }
 
     _drawDisabledSymbol(y) {
-        Board.context.font = Letter.font;
-        Board.context.fillStyle = Letter.disabledFillStyle;
-        Board.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize);
+        this.context.font = Letter.font;
+        this.context.fillStyle = Letter.disabledFillStyle;
+        this.context.fillText(this.name, Board.paddingLeft + this.col.index * Board.fontSize * 0.6, y + Board.fontSize + this.col.board.paddingTop);
     }
 }
