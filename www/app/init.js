@@ -490,6 +490,8 @@ var swipeEventHandler = function swipeEventHandler(ev) {
     var dir = ev.velocity < 0 ? 1 : -1,
         velocity = Math.abs(ev.velocity);
 
+    console.log(ev.velocity);
+
     time = 0;
     shift = 0;
     direction = -dir;
@@ -513,11 +515,13 @@ function easeOutBack(x, t, b, c, d, s) {
 
 var time;
 var shift = height;
+var timeIncrement = 10;
+var animationFraction = 16;
 var direction = 1;
 var hasNewPhrase = false;
 var interval = setInterval(function () {
     if (Math.abs(shift) <= height) {
-        time += 10;
+        time += timeIncrement;
 
         if (time) {
             mc.off("swipe");
@@ -547,7 +551,7 @@ var interval = setInterval(function () {
         hasNewPhrase = false;
         mc.on("swipe", swipeEventHandler);
     }
-}, 16);
+}, animationFraction);
 
 function animate(options) {
     board.draw();

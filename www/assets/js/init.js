@@ -78,7 +78,9 @@ var mc = new Hammer.Manager(boardElm, {
 let swipeEventHandler = function(ev) {
     var dir = ev.velocity < 0 ? 1 : -1,
         velocity = Math.abs(ev.velocity);
-    
+
+    console.log(ev.velocity);
+
     time = 0;
     shift = 0;
     direction = -dir;
@@ -102,13 +104,14 @@ function easeOutBack(x, t, b, c, d, s) {
 
 var time,
     shift = height,
-    acceleration = 10,
+    timeIncrement = 10,
+    animationFraction = 16,
     direction = 1,
     hasNewPhrase = false;
 
 var interval = setInterval(() => {
     if (Math.abs(shift) <= height){
-        time+=10;
+        time+=timeIncrement;
 
         if(time){
             mc.off("swipe");
@@ -140,7 +143,7 @@ var interval = setInterval(() => {
         hasNewPhrase = false;
         mc.on("swipe", swipeEventHandler);
     }
-}, 16);
+}, animationFraction);
 
 function animate(options) {
     board.draw();
