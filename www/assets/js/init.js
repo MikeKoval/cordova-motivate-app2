@@ -134,27 +134,35 @@ let EasingFunctions = {
     easeOutQuint: function (t) { return 1+(--t)*t*t*t*t },
     // acceleration until halfway, then deceleration
     easeInOutQuint: function (t) { return t<.5 ? 16*t*t*t*t*t : 1+16*(--t)*t*t*t*t }
-}
+};
 
 let swipeEventHandler = function(ev) {
     var dir = ev.velocity < 0 ? 1 : -1,
         velocity = Math.abs(ev.velocity);
+
+    alert('velocity: ' + velocity);
     
     let boardSpinNumber = Math.round(velocity) % boardQueueSize;
+
+    alert('boardSpinNumber: ' + boardSpinNumber);
 
     animate({
         duration: animationDuration,
         timing: EasingFunctions.easeInOutQuint,
         draw: function(progress) {
-            removeSwipeEvent();
+            // removeSwipeEvent();
 
             for(let i = 0; i < boardQueueSize; i += 1){
                 boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
             }
 
+
+
             for(let i = 0; i < boardQueueSize; i += 1){
                 boardQueue[i].draw();
             }
+
+            boardQueue[0].drawGradient();
 
             if(progress >= 1){
                 for(let i = 0; i < boardQueueSize; i += 1){
@@ -190,6 +198,10 @@ let generateBoards = (boardNumber) => {
         boardQueue.push(board);
 
         board.draw();
+
+        if(!i){
+            boardQueue[0].drawGradient();
+        }
     }
 };
 

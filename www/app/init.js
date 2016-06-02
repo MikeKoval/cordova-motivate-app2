@@ -597,13 +597,17 @@ var swipeEventHandler = function swipeEventHandler(ev) {
     var dir = ev.velocity < 0 ? 1 : -1,
         velocity = Math.abs(ev.velocity);
 
+    alert('velocity: ' + velocity);
+
     var boardSpinNumber = Math.round(velocity) % boardQueueSize;
+
+    alert('boardSpinNumber: ' + boardSpinNumber);
 
     animate({
         duration: animationDuration,
         timing: EasingFunctions.easeInOutQuint,
         draw: function draw(progress) {
-            removeSwipeEvent();
+            // removeSwipeEvent();
 
             for (var i = 0; i < boardQueueSize; i += 1) {
                 boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
@@ -612,6 +616,8 @@ var swipeEventHandler = function swipeEventHandler(ev) {
             for (var _i2 = 0; _i2 < boardQueueSize; _i2 += 1) {
                 boardQueue[_i2].draw();
             }
+
+            boardQueue[0].drawGradient();
 
             if (progress >= 1) {
                 for (var _i3 = 0; _i3 < boardQueueSize; _i3 += 1) {
@@ -647,6 +653,10 @@ var generateBoards = function generateBoards(boardNumber) {
         boardQueue.push(board);
 
         board.draw();
+
+        if (!_i4) {
+            boardQueue[0].drawGradient();
+        }
     }
 };
 
