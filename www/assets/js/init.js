@@ -25,6 +25,32 @@ import {Board} from './board';
         };
 }());
 
+
+(function(){
+
+    if ("performance" in window == false) {
+        window.performance = {};
+    }
+
+    Date.now = (Date.now || function () {  // thanks IE8
+        return new Date().getTime();
+    });
+
+    if ("now" in window.performance == false){
+
+        var nowOffset = Date.now();
+
+        if (performance.timing && performance.timing.navigationStart){
+            nowOffset = performance.timing.navigationStart
+        }
+
+        window.performance.now = function now(){
+            return Date.now() - nowOffset;
+        }
+    }
+
+})();
+
 let getWindowSizes = () => {
     let w = window,
         d = document,
@@ -83,7 +109,7 @@ let removeSwipeEvent = () => {
 function animate(options) {
     var start = performance.now();
 
-    alert('start' + start);
+
 
     requestAnimationFrame(function animate(time) {
         // timeFraction от 0 до 1
@@ -92,8 +118,6 @@ function animate(options) {
 
         // текущее состояние анимации
         var progress = options.timing(timeFraction);
-
-        alert('progress' + progress);
 
         options.draw(progress);
 
@@ -143,12 +167,8 @@ let EasingFunctions = {
 let swipeEventHandler = function(ev) {
     var dir = ev.velocity < 0 ? 1 : -1,
         velocity = Math.abs(ev.velocity);
-
-    alert('velocity: ' + velocity);
     
     let boardSpinNumber = Math.round(velocity) % boardQueueSize;
-
-    alert('boardSpinNumber: ' + boardSpinNumber);
 
     animate({
         duration: animationDuration,
