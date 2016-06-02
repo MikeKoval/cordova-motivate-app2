@@ -515,6 +515,8 @@ var removeSwipeEvent = function removeSwipeEvent() {
 function animate(options) {
     var start = performance.now();
 
+    alert('start' + start);
+
     requestAnimationFrame(function animate(time) {
         // timeFraction от 0 до 1
         var timeFraction = (time - start) / options.duration;
@@ -522,6 +524,8 @@ function animate(options) {
 
         // текущее состояние анимации
         var progress = options.timing(timeFraction);
+
+        alert('progress' + progress);
 
         options.draw(progress);
 
@@ -607,7 +611,7 @@ var swipeEventHandler = function swipeEventHandler(ev) {
         duration: animationDuration,
         timing: EasingFunctions.easeInOutQuint,
         draw: function draw(progress) {
-            // removeSwipeEvent();
+            removeSwipeEvent();
 
             for (var i = 0; i < boardQueueSize; i += 1) {
                 boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
