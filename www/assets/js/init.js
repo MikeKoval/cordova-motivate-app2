@@ -227,6 +227,8 @@ let swipeEventHandler = function(ev) {
     }
 };
 
+alert(1);
+
 let panEventHendler = (ev) => {
     // console.log(ev);
 
