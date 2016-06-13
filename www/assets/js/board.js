@@ -92,7 +92,7 @@ class Board {
         this.initPaddingTop = paddingTop;
         Board.letters = letters || 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
 
-        console.info(paddingTop, 'padidngTop');
+        // console.info(paddingTop, 'padidngTop');
 
         this.cols = [];
 

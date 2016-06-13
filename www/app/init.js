@@ -264,7 +264,7 @@ var Board = function () {
         this.initPaddingTop = paddingTop;
         Board.letters = letters || 'aбвгдеежзийклмнопрстуфхцчшщїыьеюя';
 
-        console.info(paddingTop, 'padidngTop');
+        // console.info(paddingTop, 'padidngTop');
 
         this.cols = [];
 
@@ -524,28 +524,31 @@ var initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 var boardElm = document.getElementById('canvas');
 var hammertime = new Hammer(boardElm, {});
 hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+hammertime.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
 
-var mc = new Hammer.Manager(boardElm, {
-    recognizers: [[Hammer.Swipe, { direction: Hammer.DIRECTION_VERTICAL }]]
-});
+var mc = new Hammer.Manager(boardElm);
+
+mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL }));
+mc.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_VERTICAL })).recognizeWith(mc.get('pan'));
 
 var initSwipeEvent = function initSwipeEvent() {
     mc.on("swipe", swipeEventHandler);
+    mc.on("pan", panEventHendler);
 };
 
 var removeSwipeEvent = function removeSwipeEvent() {
     mc.off("swipe");
+    mc.off("pan");
 };
 
 function animate(options) {
     var start = performance.now();
 
     requestAnimationFrame(function animate(time) {
-        // timeFraction от 0 до 1
+        // from 0 to 1
         var timeFraction = (time - start) / options.duration;
         if (timeFraction > 1) timeFraction = 1;
 
-        // текущее состояние анимации
         var progress = options.timing(timeFraction);
 
         options.draw(progress);
@@ -557,13 +560,16 @@ function animate(options) {
 }
 
 var boardQueue = [];
-var boardQueueSize = 5;
+var boardQueueSize = 10;
 var animationDuration = 1000;
 
 canvas.width = width;
 canvas.height = height;
 
 var EasingFunctions = {
+    b: function b(t) {
+        return t <= .5 ? t : 1 - t;
+    },
     // no easing, no acceleration
     linear: function linear(t) {
         return t;
@@ -619,68 +625,188 @@ var EasingFunctions = {
 };
 
 var swipeEventHandler = function swipeEventHandler(ev) {
-    var dir = ev.velocity < 0 ? 1 : -1,
+    var dir = ev.velocity < 0,
         velocity = Math.abs(ev.velocity);
 
-    var boardSpinNumber = Math.round(velocity) % boardQueueSize;
+    // ev.velocity = 0.5;
 
-    animate({
-        duration: animationDuration,
-        timing: EasingFunctions.easeInOutQuint,
-        draw: function draw(progress) {
-            removeSwipeEvent();
+    var boardSpinNumber = Math.round(velocity);
 
-            for (var i = 0; i < boardQueueSize; i += 1) {
-                boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
-            }
+    // console.info(dir == true);
 
-            for (var _i2 = 0; _i2 < boardQueueSize; _i2 += 1) {
-                boardQueue[_i2].draw();
-            }
+    console.info(ev.velocity, dir);
 
-            boardQueue[0].drawGradient();
+    if (boardSpinNumber) {
+        animate({
+            duration: animationDuration,
+            timing: EasingFunctions.easeInOutQuint,
+            draw: function draw(progress) {
+                removeSwipeEvent();
 
-            if (progress >= 1) {
-                for (var _i3 = 0; _i3 < boardQueueSize; _i3 += 1) {
-                    boardQueue[_i3].initPaddingTop = boardQueue[_i3].paddingTop;
+                for (var i = 0; i <= boardQueueSize * 2; i += 1) {
+                    if (dir) {
+                        boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
+                    } else {
+                        boardQueue[i].paddingTop = boardQueue[i].initPaddingTop + boardSpinNumber * height * progress;
+                    }
                 }
 
-                generateBoards(boardSpinNumber);
-                initSwipeEvent();
+                for (var _i2 = 0; _i2 <= boardQueueSize * 2; _i2 += 1) {
+                    boardQueue[_i2].draw();
+                }
+
+                if (progress >= 1) {
+                    for (var _i3 = 0; _i3 <= boardQueueSize * 2; _i3 += 1) {
+                        boardQueue[_i3].initPaddingTop = boardQueue[_i3].paddingTop;
+                    }
+
+                    if (dir) {
+                        appendBoards(boardSpinNumber);
+                        // console.info(boardQueue, 'append');
+                    } else {
+                            prependBoards(boardSpinNumber);
+                            // console.info(boardQueue, 'prepend');
+                        }
+
+                    // generateBoards(boardSpinNumber);
+                    initSwipeEvent();
+                }
+
+                boardQueue[boardQueueSize].drawGradient();
             }
-        }
-    });
+        });
+    } else {}
 };
 
-var generateBoards = function generateBoards(boardNumber) {
-    for (var i = 0; i < boardNumber; i += 1) {
-        boardQueue.shift();
+var panEventHendler = function panEventHendler(ev) {
+    // console.log(ev);
+
+    for (var i = 0; i <= boardQueueSize * 2; i += 1) {
+        boardQueue[i].paddingTop = boardQueue[i].initPaddingTop + ev.deltaY;
     }
 
-    for (var _i4 = boardQueueSize - boardNumber; _i4 < boardQueueSize; _i4 += 1) {
-        if (_i4) {
+    for (var _i4 = 0; _i4 <= boardQueueSize * 2; _i4 += 1) {
+        boardQueue[_i4].draw();
+    }
+
+    var absoluteDistance = Math.abs(ev.deltaY / height);
+
+    // console.info(absoluteDistance, 'absoluteDistance');
+
+    boardQueue[boardQueueSize].drawGradient();
+
+    if (ev.isFinal) {
+        // console.info(ev.isFinal);
+        animate({
+            duration: animationDuration,
+            timing: EasingFunctions.easeInOutQuint,
+            draw: function draw(progress) {
+                removeSwipeEvent();
+
+                for (var _i5 = 0; _i5 <= boardQueueSize * 2; _i5 += 1) {
+                    boardQueue[_i5].paddingTop = boardQueue[_i5].initPaddingTop + ev.deltaY - ev.deltaY * progress;
+                }
+
+                for (var _i6 = 0; _i6 <= boardQueueSize * 2; _i6 += 1) {
+                    boardQueue[_i6].draw();
+                }
+
+                if (progress >= 1) {
+                    for (var _i7 = 0; _i7 <= boardQueueSize * 2; _i7 += 1) {
+                        boardQueue[_i7].initPaddingTop = boardQueue[_i7].paddingTop;
+                    }
+
+                    console.log(progress);
+
+                    initSwipeEvent();
+                }
+
+                // console.info(progress);
+
+                boardQueue[boardQueueSize].drawGradient();
+            }
+        });
+    }
+};
+
+var generateBoards = function generateBoards() {
+    for (var i = 0, j = -boardQueueSize; i <= boardQueueSize * 2; i++, j++) {
+        if (i) {
             initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 
             while (true) {
                 initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 
-                if (initialShit !== boardQueue[_i4 - 1].phrase) {
+                if (initialShit !== boardQueue[i - 1].phrase) {
                     break;
                 }
             }
         }
 
-        var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, _i4 * cellHeight * rows, letters);
-        boardQueue.push(board);
+        // console.info(j, cellHeight, rows, 'generateBoard');
 
+        var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, j * cellHeight * rows, letters);
+        boardQueue.push(board);
         board.draw();
 
-        if (!_i4) {
-            boardQueue[0].drawGradient();
+        if (i === boardQueueSize) {
+            boardQueue[boardQueueSize].drawGradient();
         }
     }
 };
 
+var prependBoards = function prependBoards(number) {
+    for (var i = 0; i < number; i += 1) {
+        boardQueue.pop();
+    }
+
+    for (var _i8 = number; _i8 > 0; _i8 -= 1) {
+        var j = -boardQueueSize + _i8 - 1;
+
+        initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+
+        // while(true){
+        //     initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+        //
+        //     if(initialShit !== boardQueue[i + 1].phrase){
+        //         break;
+        //     }
+        // }
+
+        // console.info(j, cellHeight, rows, 'prepend');
+
+        var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, j * cellHeight * rows, letters);
+        boardQueue.unshift(board);
+        board.draw();
+    }
+};
+
+var appendBoards = function appendBoards(number) {
+    for (var i = 0; i < number; i += 1) {
+        boardQueue.shift();
+    }
+
+    for (var _i9 = number; _i9 > 0; _i9 -= 1) {
+        var j = boardQueueSize - _i9 + 1;
+
+        initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+
+        // while(true){
+        //     initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+        //
+        //     if(initialShit !== boardQueue[i - 1].phrase){
+        //         break;
+        //     }
+        // }
+
+        var board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, j * cellHeight * rows, letters);
+        boardQueue.push(board);
+        board.draw();
+    }
+};
+
 generateBoards(boardQueueSize);
+
+// prependBoards(3);
 
 initSwipeEvent();

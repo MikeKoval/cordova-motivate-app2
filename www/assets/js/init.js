@@ -91,32 +91,31 @@ let cols = 27,
 var boardElm = document.getElementById('canvas'),
     hammertime = new Hammer(boardElm, {});
     hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+    hammertime.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
 
-var mc = new Hammer.Manager(boardElm, {
-    recognizers: [
-        [Hammer.Swipe,{ direction: Hammer.DIRECTION_VERTICAL }]
-    ]
-});
+var mc = new Hammer.Manager(boardElm);
+
+mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL }));
+mc.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_VERTICAL })).recognizeWith(mc.get('pan'));
 
 let initSwipeEvent = () => {
     mc.on("swipe", swipeEventHandler);
+    mc.on("pan", panEventHendler);
 };
 
 let removeSwipeEvent = () => {
     mc.off("swipe");
+    mc.off("pan");
 };
 
 function animate(options) {
     var start = performance.now();
 
-    alert("start" + start);
-
     requestAnimationFrame(function animate(time) {
-        // timeFraction от 0 до 1
+        // from 0 to 1
         var timeFraction = (time - start) / options.duration;
         if (timeFraction > 1) timeFraction = 1;
 
-        // текущее состояние анимации
         var progress = options.timing(timeFraction);
 
         options.draw(progress);
@@ -129,13 +128,16 @@ function animate(options) {
 }
 
 let boardQueue = [];
-let boardQueueSize = 5;
+let boardQueueSize = 10;
 let animationDuration = 1000;
 
 canvas.width = width;
 canvas.height = height;
 
 let EasingFunctions = {
+    b: function(t) {
+      return t<=.5 ? t : 1-t;
+    },
     // no easing, no acceleration
     linear: function (t) { return t },
     // accelerating from zero velocity
@@ -165,45 +167,121 @@ let EasingFunctions = {
 };
 
 let swipeEventHandler = function(ev) {
-    var dir = ev.velocity < 0 ? 1 : -1,
+    var dir = ev.velocity < 0,
         velocity = Math.abs(ev.velocity);
+
+    // ev.velocity = 0.5;
     
-    let boardSpinNumber = Math.round(velocity) % boardQueueSize;
+    let boardSpinNumber = Math.round(velocity);
 
-    animate({
-        duration: animationDuration,
-        timing: EasingFunctions.easeInOutQuint,
-        draw: function(progress) {
-            removeSwipeEvent();
+    // console.info(dir == true);
 
-            for(let i = 0; i < boardQueueSize; i += 1){
-                boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
-            }
 
-            for(let i = 0; i < boardQueueSize; i += 1){
-                boardQueue[i].draw();
-            }
 
-            boardQueue[0].drawGradient();
+    console.info(ev.velocity, dir);
 
-            if(progress >= 1){
-                for(let i = 0; i < boardQueueSize; i += 1){
-                    boardQueue[i].initPaddingTop = boardQueue[i].paddingTop;
+    if(boardSpinNumber) {
+        animate({
+            duration: animationDuration,
+            timing: EasingFunctions.easeInOutQuint,
+            draw: function(progress) {
+                removeSwipeEvent();
+
+                for(let i = 0; i <= boardQueueSize * 2; i += 1){
+                    if(dir) {
+                        boardQueue[i].paddingTop = boardQueue[i].initPaddingTop - boardSpinNumber * height * progress;
+                    }
+                    else{
+                        boardQueue[i].paddingTop = boardQueue[i].initPaddingTop + boardSpinNumber * height * progress;
+                    }
                 }
 
-                generateBoards(boardSpinNumber);
-                initSwipeEvent();
+                for(let i = 0; i <= boardQueueSize * 2; i += 1){
+                    boardQueue[i].draw();
+                }
+
+                if(progress >= 1){
+                    for(let i = 0; i <= boardQueueSize * 2; i += 1){
+                        boardQueue[i].initPaddingTop = boardQueue[i].paddingTop;
+                    }
+
+                    if(dir) {
+                        appendBoards(boardSpinNumber);
+                        // console.info(boardQueue, 'append');
+                    }
+                    else{
+                        prependBoards(boardSpinNumber);
+                        // console.info(boardQueue, 'prepend');
+                    }
+
+                    // generateBoards(boardSpinNumber);
+                    initSwipeEvent();
+                }
+
+                boardQueue[boardQueueSize].drawGradient();
             }
-        }
-    });
+        });
+    }
+    else {
+
+    }
 };
 
-let generateBoards = (boardNumber) => {
-    for(let i = 0; i < boardNumber; i += 1){
-        boardQueue.shift();
+let panEventHendler = (ev) => {
+    // console.log(ev);
+
+    for(let i = 0; i <= boardQueueSize * 2; i += 1){
+        boardQueue[i].paddingTop = boardQueue[i].initPaddingTop + ev.deltaY;
     }
 
-    for(let i = boardQueueSize - boardNumber; i < boardQueueSize; i += 1){
+    for(let i = 0; i <= boardQueueSize * 2; i += 1) {
+        boardQueue[i].draw();
+    }
+
+    let absoluteDistance = Math.abs(ev.deltaY / height);
+
+    // console.info(absoluteDistance, 'absoluteDistance');
+
+    boardQueue[boardQueueSize].drawGradient();
+
+    if(ev.isFinal) {
+        // console.info(ev.isFinal);
+        animate({
+            duration: animationDuration,
+            timing: EasingFunctions.easeInOutQuint,
+            draw: function(progress) {
+                removeSwipeEvent();
+
+                for(let i = 0; i <= boardQueueSize * 2; i += 1){
+                    boardQueue[i].paddingTop = boardQueue[i].initPaddingTop + ev.deltaY - ev.deltaY * progress;
+                }
+
+                for(let i = 0; i <= boardQueueSize * 2; i += 1){
+                    boardQueue[i].draw();
+                }
+
+                if(progress >= 1){
+                    for(let i = 0; i <= boardQueueSize * 2; i += 1){
+                        boardQueue[i].initPaddingTop = boardQueue[i].paddingTop;
+                    }
+
+                    console.log(progress);
+
+                    initSwipeEvent();
+                }
+
+                // console.info(progress);
+
+                boardQueue[boardQueueSize].drawGradient();
+            }
+        });
+    }
+
+
+};
+
+let generateBoards = () => {
+    for(let i = 0, j = -boardQueueSize; i <= boardQueueSize * 2; i++, j++) {
         if(i){
             initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 
@@ -216,18 +294,71 @@ let generateBoards = (boardNumber) => {
             }
         }
 
-        let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, i * cellHeight * rows, letters);
-        boardQueue.push(board);
+        // console.info(j, cellHeight, rows, 'generateBoard');
 
+        let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, j * cellHeight * rows, letters);
+        boardQueue.push(board);
         board.draw();
 
-        if(!i){
-            boardQueue[0].drawGradient();
+        if(i === boardQueueSize){
+            boardQueue[boardQueueSize].drawGradient();
         }
     }
 };
 
+let prependBoards = (number) => {
+    for(let i = 0; i < number; i += 1) {
+        boardQueue.pop();
+    }
+
+    for(let i = number; i > 0; i -= 1) {
+        let j = -boardQueueSize + i - 1;
+
+        initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+
+        // while(true){
+        //     initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+        //
+        //     if(initialShit !== boardQueue[i + 1].phrase){
+        //         break;
+        //     }
+        // }
+
+        // console.info(j, cellHeight, rows, 'prepend');
+
+        let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, j * cellHeight * rows, letters);
+        boardQueue.unshift(board);
+        board.draw();
+    }
+};
+
+let appendBoards = (number) => {
+    for(let i = 0; i < number; i += 1) {
+        boardQueue.shift();
+    }
+
+    for(let i = number; i > 0; i -= 1) {
+        let j = boardQueueSize - i + 1;
+
+        initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+
+        // while(true){
+        //     initialShit = dictionary[Board.random(0, dictionary.length - 1)];
+        //
+        //     if(initialShit !== boardQueue[i - 1].phrase){
+        //         break;
+        //     }
+        // }
+
+        let board = new Board(ctx, initialShit, cols, rows, fontSize, cellWidth, cellHeight, paddingLeft, j * cellHeight * rows, letters);
+        boardQueue.push(board);
+        board.draw();
+    }
+};
+
 generateBoards(boardQueueSize);
+
+// prependBoards(3);
 
 initSwipeEvent();
 
