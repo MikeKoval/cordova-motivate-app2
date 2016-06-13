@@ -524,7 +524,7 @@ var initialShit = dictionary[Board.random(0, dictionary.length - 1)];
 var boardElm = document.getElementById('canvas');
 var hammertime = new Hammer(boardElm, {});
 hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
-hammertime.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
+// hammertime.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
 
 var mc = new Hammer.Manager(boardElm);
 
@@ -677,6 +677,8 @@ var swipeEventHandler = function swipeEventHandler(ev) {
         });
     } else {}
 };
+
+// alert(1);
 
 var panEventHendler = function panEventHendler(ev) {
     // console.log(ev);

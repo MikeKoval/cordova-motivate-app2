@@ -91,7 +91,7 @@ let cols = 27,
 var boardElm = document.getElementById('canvas'),
     hammertime = new Hammer(boardElm, {});
     hammertime.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
-    hammertime.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
+    // hammertime.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
 
 var mc = new Hammer.Manager(boardElm);
 
@@ -227,7 +227,7 @@ let swipeEventHandler = function(ev) {
     }
 };
 
-alert(1);
+// alert(1);
 
 let panEventHendler = (ev) => {
     // console.log(ev);
