@@ -95,17 +95,17 @@ var boardElm = document.getElementById('canvas'),
 
 var mc = new Hammer.Manager(boardElm);
 
-mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL }));
-mc.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_VERTICAL })).recognizeWith(mc.get('pan'));
+// mc.add(new Hammer.Pan({ direction: Hammer.DIRECTION_VERTICAL }));
+mc.add(new Hammer.Swipe({ direction: Hammer.DIRECTION_VERTICAL }));//.recognizeWith(mc.get('pan'));
 
 let initSwipeEvent = () => {
     mc.on("swipe", swipeEventHandler);
-    mc.on("pan", panEventHendler);
+    // mc.on("pan", panEventHendler);
 };
 
 let removeSwipeEvent = () => {
     mc.off("swipe");
-    mc.off("pan");
+    // mc.off("pan");
 };
 
 function animate(options) {
